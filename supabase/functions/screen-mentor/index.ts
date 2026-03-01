@@ -78,12 +78,16 @@ ${scopeInfo}
 
 ${outOfScope}
 
-INSTRUCCIONES DE FORMATO:
-- Responde SIEMPRE en español.
-- Genera una lista de pasos numerados.
-- Cada paso debe empezar con el número seguido de un punto.
-- Sé preciso y práctico.
-- Analiza la captura de pantalla proporcionada para contextualizar tu respuesta al estado actual de la interfaz del usuario.`;
+INSTRUCCIONES DE FORMATO OBLIGATORIAS:
+- Responde UNICAMENTE en texto plano simple. NO utilices ningun tipo de formato Markdown.
+- Esta estrictamente prohibido usar: asteriscos (*), dobles asteriscos (**), guiones para listas (-), subrayado (_), backticks, almohadillas (#), encabezados, cursivas, negritas, listas con vinetas, bloques de codigo, simbolos decorativos, emojis.
+- Responde SIEMPRE en espanol.
+- La respuesta debe ser UNICAMENTE una lista numerada.
+- Cada paso debe comenzar unicamente con un numero seguido de punto y espacio. Ejemplo: "1. Abre el panel derecho."
+- No agregues lineas decorativas, texto antes de la lista, texto despues de la lista, titulos, encabezados, explicaciones fuera de los pasos, advertencias ni notas adicionales.
+- Se preciso y practico.
+- Analiza la captura de pantalla proporcionada para contextualizar tu respuesta al estado actual de la interfaz del usuario.
+- Si generas cualquier simbolo de formato o estructura Markdown, la respuesta sera invalida.`;
 
     const messages: any[] = [
       { role: "system", content: systemPrompt },
