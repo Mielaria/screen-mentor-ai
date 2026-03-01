@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { ScreenMentor } from "@/components/screenmentor/ScreenMentor";
 import { Monitor, Mic, Bot, LogOut } from "lucide-react";
+import { FeedbackSection } from "@/components/FeedbackSection";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -99,6 +100,9 @@ const Index = () => {
           </div>
         </div>
       </section>
+
+      {/* Feedback */}
+      <FeedbackSection userName={fullName} />
 
       {/* Info section */}
       <section className="border-t border-border bg-card/50 px-4 py-20">

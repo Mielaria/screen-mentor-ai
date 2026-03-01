@@ -2,3 +2,6 @@ project_id = "rzonbhlehjmycbjbsgem"
 
 [functions.screen-mentor]
 verify_jwt = false
+
+[functions.send-feedback]
+verify_jwt = false
