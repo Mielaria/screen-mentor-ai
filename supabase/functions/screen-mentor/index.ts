@@ -85,36 +85,32 @@ INSTRUCCIONES DE FORMATO:
 - Sé preciso y práctico.
 - Analiza la captura de pantalla proporcionada para contextualizar tu respuesta al estado actual de la interfaz del usuario.`;
 
-    const messages: any[] = [
-      { role: "system", content: systemPrompt },
-    ];
+    // Build input for Responses API
+    const input: any[] = [];
 
-    // Build user message with image if provided
     if (image_base64) {
-      messages.push({
+      input.push({
         role: "user",
         content: [
           {
-            type: "image_url",
-            image_url: {
-              url: `data:image/jpeg;base64,${image_base64}`,
-              detail: "low",
-            },
+            type: "input_image",
+            image_url: `data:image/jpeg;base64,${image_base64}`,
+            detail: "low",
           },
           {
-            type: "text",
+            type: "input_text",
             text: texto_transcrito || "¿Qué puedo hacer aquí?",
           },
         ],
       });
     } else {
-      messages.push({
+      input.push({
         role: "user",
         content: texto_transcrito || "¿Qué puedo hacer aquí?",
       });
     }
 
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    const response = await fetch("https://api.openai.com/v1/responses", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${OPENAI_API_KEY}`,
@@ -122,8 +118,9 @@ INSTRUCCIONES DE FORMATO:
       },
       body: JSON.stringify({
         model: "gpt-4o",
-        messages,
-        max_tokens: 1024,
+        instructions: systemPrompt,
+        input,
+        max_output_tokens: 1024,
         temperature: 0.3,
       }),
     });
@@ -146,7 +143,8 @@ INSTRUCCIONES DE FORMATO:
     }
 
     const data = await response.json();
-    const content = data.choices?.[0]?.message?.content || "No se pudo generar una respuesta.";
+    const outputMessage = data.output?.find((o: any) => o.type === "message");
+    const content = outputMessage?.content?.find((c: any) => c.type === "output_text")?.text || "No se pudo generar una respuesta.";
 
     return new Response(JSON.stringify({ steps: content }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
