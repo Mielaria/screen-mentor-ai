@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { Monitor, MonitorOff, Mic, Volume2, VolumeX, X, Minus, GripHorizontal } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import { Monitor, MonitorOff, Mic, X, Minus, GripHorizontal, SkipForward, RotateCcw, Square } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useScreenCapture } from "@/hooks/useScreenCapture";
 import { useVoiceInput } from "@/hooks/useVoiceInput";
@@ -17,7 +17,8 @@ interface CopilotPanelProps {
 export function CopilotPanel({ isOpen, onClose }: CopilotPanelProps) {
   const [software, setSoftware] = useState("photoshop");
   const [level, setLevel] = useState("basico");
-  const [response, setResponse] = useState<string | null>(null);
+  const [steps, setSteps] = useState<string[]>([]);
+  const [currentStep, setCurrentStep] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
@@ -25,6 +26,18 @@ export function CopilotPanel({ isOpen, onClose }: CopilotPanelProps) {
   const { isSharing, startCapture, stopCapture, captureSnapshot } = useScreenCapture();
   const { isListening, transcript, startListening, stopListening, clearTranscript } = useVoiceInput();
   const { speak, stop: stopTTS } = useTTS();
+
+  const speakStep = useCallback((text: string) => {
+    stopTTS();
+    setIsSpeaking(true);
+    speak(text);
+    const checkInterval = setInterval(() => {
+      if (!window.speechSynthesis.speaking) {
+        setIsSpeaking(false);
+        clearInterval(checkInterval);
+      }
+    }, 300);
+  }, [speak, stopTTS]);
 
   useEffect(() => {
     if (transcript && !isListening) {
@@ -34,8 +47,10 @@ export function CopilotPanel({ isOpen, onClose }: CopilotPanelProps) {
 
   const handleQuery = async (text: string) => {
     setIsLoading(true);
-    setResponse(null);
+    setSteps([]);
+    setCurrentStep(0);
     stopTTS();
+    setIsSpeaking(false);
 
     const image_base64 = captureSnapshot();
 
@@ -51,34 +66,45 @@ export function CopilotPanel({ isOpen, onClose }: CopilotPanelProps) {
 
       if (error) throw error;
 
-      const stepsText = data?.steps || "No se pudo generar una respuesta.";
-      setResponse(stepsText);
+      const rawSteps = data?.steps || "No se pudo generar una respuesta.";
+      const parsed: string[] = typeof rawSteps === "string"
+        ? rawSteps.split("\n").filter((l: string) => l.trim())
+        : Array.isArray(rawSteps) ? rawSteps : [String(rawSteps)];
+
+      setSteps(parsed);
+      setCurrentStep(0);
       clearTranscript();
 
-      setIsSpeaking(true);
-      speak(stepsText);
-      const checkInterval = setInterval(() => {
-        if (!window.speechSynthesis.speaking) {
-          setIsSpeaking(false);
-          clearInterval(checkInterval);
-        }
-      }, 500);
+      // Auto-read first step only
+      if (parsed.length > 0) {
+        speakStep(parsed[0]);
+      }
     } catch (err: any) {
       console.error("Query error:", err);
-      setResponse("Error: No se pudo procesar tu solicitud. Intenta de nuevo.");
+      setSteps(["Error: No se pudo procesar tu solicitud. Intenta de nuevo."]);
+      setCurrentStep(0);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const toggleTTS = () => {
-    if (isSpeaking) {
-      stopTTS();
-      setIsSpeaking(false);
-    } else if (response) {
-      setIsSpeaking(true);
-      speak(response);
+  const handleNextStep = () => {
+    const next = currentStep + 1;
+    if (next < steps.length) {
+      setCurrentStep(next);
+      speakStep(steps[next]);
     }
+  };
+
+  const handleRepeatStep = () => {
+    if (steps.length > 0) {
+      speakStep(steps[currentStep]);
+    }
+  };
+
+  const handleStopReading = () => {
+    stopTTS();
+    setIsSpeaking(false);
   };
 
   const handleMic = () => {
@@ -90,6 +116,9 @@ export function CopilotPanel({ isOpen, onClose }: CopilotPanelProps) {
   };
 
   if (!isOpen) return null;
+
+  const isLastStep = currentStep >= steps.length - 1;
+  const hasSteps = steps.length > 0;
 
   return (
     <div
@@ -150,7 +179,42 @@ export function CopilotPanel({ isOpen, onClose }: CopilotPanelProps) {
               </div>
             )}
 
-            <ResponseArea response={response} isLoading={isLoading} />
+            <ResponseArea steps={steps} currentStep={currentStep} isLoading={isLoading} />
+
+            {/* Step controls */}
+            {hasSteps && !isLoading && (
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleRepeatStep}
+                  className="flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-border bg-card py-2.5 text-xs font-medium text-muted-foreground transition-all hover:bg-accent hover:text-foreground"
+                >
+                  <RotateCcw className="h-3.5 w-3.5" />
+                  Repetir
+                </button>
+                <button
+                  onClick={handleStopReading}
+                  disabled={!isSpeaking}
+                  className={cn(
+                    "flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-border bg-card py-2.5 text-xs font-medium text-muted-foreground transition-all hover:bg-accent hover:text-foreground",
+                    !isSpeaking && "opacity-40 cursor-not-allowed"
+                  )}
+                >
+                  <Square className="h-3.5 w-3.5" />
+                  Detener
+                </button>
+                <button
+                  onClick={handleNextStep}
+                  disabled={isLastStep}
+                  className={cn(
+                    "flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-primary py-2.5 text-xs font-semibold text-primary-foreground transition-all hover:bg-primary/90",
+                    isLastStep && "opacity-40 cursor-not-allowed"
+                  )}
+                >
+                  <SkipForward className="h-3.5 w-3.5" />
+                  Siguiente
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Footer */}
@@ -169,16 +233,6 @@ export function CopilotPanel({ isOpen, onClose }: CopilotPanelProps) {
               <Mic className="h-4 w-4" />
               Consultar
             </button>
-
-            {response && (
-              <button
-                onClick={toggleTTS}
-                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-border bg-card text-muted-foreground transition-all hover:bg-accent hover:text-foreground"
-                aria-label={isSpeaking ? "Detener audio" : "Reproducir audio"}
-              >
-                {isSpeaking ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
-              </button>
-            )}
           </div>
         </>
       )}
