@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from "react";
-import { Monitor, MonitorOff, Mic, X, Minus, GripHorizontal, SkipForward, RotateCcw, Square } from "lucide-react";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { Monitor, MonitorOff, Mic, X, Minus, GripHorizontal, SkipForward, RotateCcw, Square, Upload, ImageIcon, Smartphone } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 import { useScreenCapture } from "@/hooks/useScreenCapture";
@@ -7,6 +7,7 @@ import { useVoiceInput } from "@/hooks/useVoiceInput";
 import { useTTS } from "@/hooks/useTTS";
 import { useDraggable } from "@/hooks/useDraggable";
 import { useResizable } from "@/hooks/useResizable";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { SoftwareSelector } from "./SoftwareSelector";
 import { LevelSelector } from "./LevelSelector";
 import { ResponseArea } from "./ResponseArea";
@@ -27,9 +28,11 @@ export function CopilotPanel({ isOpen, onClose, onMinimize }: CopilotPanelProps)
   const [isLoading, setIsLoading] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
 
-  const { isSharing, startCapture, stopCapture, captureSnapshot } = useScreenCapture();
+  const { isSharing, hasManualCapture, startCapture, stopCapture, captureSnapshot, setManualCapture, clearManualCapture } = useScreenCapture();
   const { isListening, transcript, startListening, stopListening, clearTranscript } = useVoiceInput();
   const { speak, stop: stopTTS } = useTTS();
+  const isMobile = useIsMobile();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { position, onMouseDown } = useDraggable({
     x: Math.max(40, window.innerWidth - 400),
@@ -128,6 +131,23 @@ export function CopilotPanel({ isOpen, onClose, onMinimize }: CopilotPanelProps)
     }
   };
 
+  const handleFileUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      const base64 = result.split(",")[1];
+      if (base64) {
+        setManualCapture(base64);
+      }
+    };
+    reader.readAsDataURL(file);
+    // Reset input so same file can be re-selected
+    e.target.value = "";
+  }, [setManualCapture]);
+
   if (!isOpen) return null;
 
   const isLastStep = currentStep >= steps.length - 1;
@@ -173,19 +193,55 @@ export function CopilotPanel({ isOpen, onClose, onMinimize }: CopilotPanelProps)
 
       {/* Body */}
       <div className="flex flex-1 flex-col gap-4 overflow-y-auto px-3 py-3 min-h-0">
-        {/* Screen share */}
-        <button
-          onClick={isSharing ? stopCapture : startCapture}
-          className={cn(
-            "flex items-center justify-center gap-2 rounded-xl border px-3 py-2.5 text-xs font-medium transition-all w-full shrink-0",
-            isSharing
-              ? "border-primary/30 bg-primary/10 text-primary"
-              : "border-primary bg-primary text-primary-foreground hover:bg-primary/90"
-          )}
-        >
-          {isSharing ? <Monitor className="h-3.5 w-3.5" /> : <MonitorOff className="h-3.5 w-3.5" />}
-          {isSharing ? "Pantalla compartida" : "Compartir pantalla"}
-        </button>
+        {/* Screen capture: desktop vs mobile */}
+        {isMobile ? (
+          <div className="space-y-2 shrink-0">
+            <div className="flex items-center gap-2 rounded-xl border border-border bg-accent/30 px-3 py-2 text-[10px] text-muted-foreground">
+              <Smartphone className="h-3.5 w-3.5 shrink-0" />
+              En dispositivos móviles no es posible compartir pantalla desde el navegador. Por favor, sube una captura manualmente.
+            </div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleFileUpload}
+            />
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className={cn(
+                "flex items-center justify-center gap-2 rounded-xl border px-3 py-2.5 text-xs font-medium transition-all w-full",
+                hasManualCapture
+                  ? "border-primary/30 bg-primary/10 text-primary"
+                  : "border-primary bg-primary text-primary-foreground hover:bg-primary/90"
+              )}
+            >
+              {hasManualCapture ? <ImageIcon className="h-3.5 w-3.5" /> : <Upload className="h-3.5 w-3.5" />}
+              {hasManualCapture ? "Captura cargada" : "Subir captura"}
+            </button>
+            {hasManualCapture && (
+              <button
+                onClick={clearManualCapture}
+                className="w-full text-[10px] text-muted-foreground hover:text-foreground transition-colors"
+              >
+                Eliminar captura
+              </button>
+            )}
+          </div>
+        ) : (
+          <button
+            onClick={isSharing ? stopCapture : startCapture}
+            className={cn(
+              "flex items-center justify-center gap-2 rounded-xl border px-3 py-2.5 text-xs font-medium transition-all w-full shrink-0",
+              isSharing
+                ? "border-primary/30 bg-primary/10 text-primary"
+                : "border-primary bg-primary text-primary-foreground hover:bg-primary/90"
+            )}
+          >
+            {isSharing ? <Monitor className="h-3.5 w-3.5" /> : <MonitorOff className="h-3.5 w-3.5" />}
+            {isSharing ? "Pantalla compartida" : "Compartir pantalla"}
+          </button>
+        )}
 
         <SoftwareSelector selected={software} onSelect={setSoftware} />
         <LevelSelector selected={level} onSelect={setLevel} />
