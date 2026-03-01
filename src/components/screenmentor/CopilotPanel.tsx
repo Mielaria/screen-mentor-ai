@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
-import { Monitor, MonitorOff, Mic, X, Minus, GripHorizontal, SkipForward, RotateCcw, Square } from "lucide-react";
+import { Monitor, MonitorOff, Mic, X, Minus, GripHorizontal, SkipForward, RotateCcw, Square, LogOut } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { useScreenCapture } from "@/hooks/useScreenCapture";
 import { useVoiceInput } from "@/hooks/useVoiceInput";
 import { useTTS } from "@/hooks/useTTS";
@@ -18,6 +19,7 @@ interface CopilotPanelProps {
 }
 
 export function CopilotPanel({ isOpen, onClose, onMinimize }: CopilotPanelProps) {
+  const { signOut } = useAuth();
   const [software, setSoftware] = useState("photoshop");
   const [level, setLevel] = useState("basico");
   const [steps, setSteps] = useState<string[]>([]);
@@ -152,6 +154,13 @@ export function CopilotPanel({ isOpen, onClose, onMinimize }: CopilotPanelProps)
           <span className="text-xs font-semibold text-foreground tracking-wide">ScreenMentor</span>
         </div>
         <div className="flex items-center gap-0.5">
+          <button
+            onClick={signOut}
+            className="flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-destructive/20 hover:text-destructive"
+            title="Cerrar sesión"
+          >
+            <LogOut className="h-3.5 w-3.5" />
+          </button>
           <button
             onClick={onMinimize}
             className="flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
