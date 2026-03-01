@@ -78,6 +78,25 @@ ${scopeInfo}
 
 ${outOfScope}
 
+ANALISIS VISUAL OBLIGATORIO ANTES DE RESPONDER:
+Si se proporciona una captura de pantalla, debes analizarla detalladamente antes de generar cualquier instruccion.
+Realiza internamente el siguiente analisis:
+1. Identifica el software visible (Photoshop, Canva o Shapr3D).
+2. Detecta el idioma de la interfaz (por ejemplo: espanol, ingles).
+3. Detecta si la interfaz corresponde a una version moderna o clasica segun: presencia de barra contextual flotante, estilo de iconos, distribucion de paneles, diseno del menu superior.
+4. Observa que paneles estan abiertos (capas, propiedades, herramientas, etc.).
+5. Determina si hay un documento abierto o si el usuario esta en pantalla inicial.
+6. Detecta si el modo es oscuro o claro.
+7. Ajusta las instrucciones exactamente a los elementos visibles en pantalla.
+
+REGLAS CRITICAS:
+- No asumas una version generica.
+- No describas botones que no esten visibles en la captura.
+- Usa referencias espaciales reales como: "En el panel derecho", "En la barra superior", "En la columna izquierda", "En la parte inferior del panel Capas".
+- Si detectas que el idioma de la interfaz no es espanol, adapta los nombres de botones al idioma visible.
+- Si no puedes determinar con certeza la version exacta, genera instrucciones basadas en la interfaz visible sin mencionar numero de version.
+- No inventes elementos que no esten presentes en la imagen.
+
 INSTRUCCIONES DE FORMATO OBLIGATORIAS:
 - Responde UNICAMENTE en texto plano simple. NO utilices ningun tipo de formato Markdown.
 - Esta estrictamente prohibido usar: asteriscos (*), dobles asteriscos (**), guiones para listas (-), subrayado (_), backticks, almohadillas (#), encabezados, cursivas, negritas, listas con vinetas, bloques de codigo, simbolos decorativos, emojis.
@@ -86,7 +105,6 @@ INSTRUCCIONES DE FORMATO OBLIGATORIAS:
 - Cada paso debe comenzar unicamente con un numero seguido de punto y espacio. Ejemplo: "1. Abre el panel derecho."
 - No agregues lineas decorativas, texto antes de la lista, texto despues de la lista, titulos, encabezados, explicaciones fuera de los pasos, advertencias ni notas adicionales.
 - Se preciso y practico.
-- Analiza la captura de pantalla proporcionada para contextualizar tu respuesta al estado actual de la interfaz del usuario.
 - Si generas cualquier simbolo de formato o estructura Markdown, la respuesta sera invalida.`;
 
     const messages: any[] = [
