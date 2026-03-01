@@ -121,7 +121,7 @@ INSTRUCCIONES DE FORMATO:
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "openai/gpt-5",
+        model: "openai/gpt-5.2",
         messages,
         max_tokens: 1024,
         temperature: 0.3,
