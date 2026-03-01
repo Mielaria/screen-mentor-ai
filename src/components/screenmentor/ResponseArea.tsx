@@ -1,11 +1,13 @@
 import { Loader2 } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface ResponseAreaProps {
-  response: string | null;
+  steps: string[];
+  currentStep: number;
   isLoading: boolean;
 }
 
-export function ResponseArea({ response, isLoading }: ResponseAreaProps) {
+export function ResponseArea({ steps, currentStep, isLoading }: ResponseAreaProps) {
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center gap-3 py-10">
@@ -17,7 +19,7 @@ export function ResponseArea({ response, isLoading }: ResponseAreaProps) {
     );
   }
 
-  if (!response) {
+  if (steps.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center gap-2 py-10 text-center">
         <span className="text-3xl">🎯</span>
@@ -28,21 +30,26 @@ export function ResponseArea({ response, isLoading }: ResponseAreaProps) {
     );
   }
 
-  // Parse numbered steps
-  const lines = response.split("\n").filter((l) => l.trim());
-
   return (
     <div className="space-y-3 overflow-y-auto pr-1">
       <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
         Instrucciones
       </span>
       <div className="space-y-2">
-        {lines.map((line, i) => (
+        {steps.map((step, i) => (
           <div
             key={i}
-            className="rounded-lg border border-border bg-card p-3 text-sm leading-relaxed text-foreground"
+            className={cn(
+              "rounded-lg border p-3 text-sm leading-relaxed transition-all duration-300",
+              i === currentStep
+                ? "border-primary bg-primary/10 text-foreground ring-1 ring-primary/30"
+                : i < currentStep
+                  ? "border-border bg-card text-muted-foreground"
+                  : "border-border bg-card text-muted-foreground opacity-60"
+            )}
           >
-            {line}
+            <span className="mr-2 font-semibold text-primary">{i + 1}.</span>
+            {step}
           </div>
         ))}
       </div>
