@@ -255,42 +255,42 @@ export function CopilotPanel({ isOpen, onClose, onMinimize }: CopilotPanelProps)
         )}
 
         <ResponseArea steps={steps} currentStep={currentStep} isLoading={isLoading} />
-
-        {/* Step controls */}
-        {hasSteps && !isLoading && (
-          <div className="flex items-center gap-1.5 shrink-0">
-            <button
-              onClick={handleRepeatStep}
-              className="flex flex-1 items-center justify-center gap-1 rounded-xl border border-border bg-card py-2 text-[10px] font-medium text-muted-foreground transition-all hover:bg-accent hover:text-foreground"
-            >
-              <RotateCcw className="h-3 w-3" />
-              Repetir
-            </button>
-            <button
-              onClick={handleStopReading}
-              disabled={!isSpeaking}
-              className={cn(
-                "flex flex-1 items-center justify-center gap-1 rounded-xl border border-border bg-card py-2 text-[10px] font-medium text-muted-foreground transition-all hover:bg-accent hover:text-foreground",
-                !isSpeaking && "opacity-40 cursor-not-allowed"
-              )}
-            >
-              <Square className="h-3 w-3" />
-              Detener
-            </button>
-            <button
-              onClick={handleNextStep}
-              disabled={isLastStep}
-              className={cn(
-                "flex flex-1 items-center justify-center gap-1 rounded-xl bg-primary py-2 text-[10px] font-semibold text-primary-foreground transition-all hover:bg-primary/90",
-                isLastStep && "opacity-40 cursor-not-allowed"
-              )}
-            >
-              <SkipForward className="h-3 w-3" />
-              Siguiente
-            </button>
-          </div>
-        )}
       </div>
+
+      {/* Step controls — fixed above footer */}
+      {hasSteps && !isLoading && (
+        <div className="flex items-center gap-1.5 shrink-0 border-t border-border px-3 py-2">
+          <button
+            onClick={handleRepeatStep}
+            className="flex flex-1 items-center justify-center gap-1 rounded-xl border border-border bg-card py-2 text-[10px] font-medium text-muted-foreground transition-all hover:bg-accent hover:text-foreground"
+          >
+            <RotateCcw className="h-3 w-3" />
+            Repetir
+          </button>
+          <button
+            onClick={handleStopReading}
+            disabled={!isSpeaking}
+            className={cn(
+              "flex flex-1 items-center justify-center gap-1 rounded-xl border border-border bg-card py-2 text-[10px] font-medium text-muted-foreground transition-all hover:bg-accent hover:text-foreground",
+              !isSpeaking && "opacity-40 cursor-not-allowed"
+            )}
+          >
+            <Square className="h-3 w-3" />
+            Detener
+          </button>
+          <button
+            onClick={handleNextStep}
+            disabled={isLastStep}
+            className={cn(
+              "flex flex-1 items-center justify-center gap-1 rounded-xl bg-primary py-2 text-[10px] font-semibold text-primary-foreground transition-all hover:bg-primary/90",
+              isLastStep && "opacity-40 cursor-not-allowed"
+            )}
+          >
+            <SkipForward className="h-3 w-3" />
+            Siguiente
+          </button>
+        </div>
+      )}
 
       {/* Footer — Mic button */}
       <div className="flex items-center gap-2 border-t border-border px-3 py-2.5 shrink-0">
