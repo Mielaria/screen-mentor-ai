@@ -1,1 +1,4 @@
 project_id = "rzonbhlehjmycbjbsgem"
+
+[functions.screen-mentor]
+verify_jwt = false
