@@ -32,7 +32,7 @@ const Index = () => {
   }, [user]);
 
   return (
-    <div className="dark flex min-h-screen flex-col items-center justify-center bg-background px-4 relative">
+    <div className="dark flex min-h-screen flex-col items-center justify-center bg-background px-4 relative overflow-hidden">
       {/* Top bar with logout */}
       <div className="absolute top-4 right-4 z-50">
         <button
