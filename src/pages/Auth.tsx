@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Bot, Mail, Lock, User, ArrowLeft, Loader2 } from "lucide-react";
+import { Bot, Mail, Lock, User, ArrowLeft, Loader2, RefreshCw, ShieldCheck } from "lucide-react";
 
-type View = "landing" | "login" | "register";
+type View = "landing" | "login" | "register" | "verify-otp";
 
 export default function Auth() {
   const [view, setView] = useState<View>("landing");
@@ -12,6 +12,8 @@ export default function Auth() {
   const [error, setError] = useState("");
   const [info, setInfo] = useState("");
   const [loading, setLoading] = useState(false);
+  const [otpDigits, setOtpDigits] = useState<string[]>(["", "", "", "", "", ""]);
+  const otpRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   const resetForm = () => {
     setEmail("");
@@ -19,6 +21,7 @@ export default function Auth() {
     setFullName("");
     setError("");
     setInfo("");
+    setOtpDigits(["", "", "", "", "", ""]);
   };
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -58,18 +61,91 @@ export default function Auth() {
       password,
       options: {
         data: { full_name: fullName },
-        emailRedirectTo: window.location.origin,
       },
     });
 
     if (error) {
       setError(error.message);
     } else {
-      setInfo("¡Cuenta creada! Revisa tu correo electrónico para verificar tu cuenta antes de iniciar sesión.");
+      setOtpDigits(["", "", "", "", "", ""]);
+      setView("verify-otp");
+      setInfo("Hemos enviado un código de 6 dígitos a tu correo. Ingrésalo a continuación.");
     }
     setLoading(false);
   };
 
+  const handleOtpChange = (index: number, value: string) => {
+    if (!/^\d*$/.test(value)) return;
+    const newDigits = [...otpDigits];
+    newDigits[index] = value.slice(-1);
+    setOtpDigits(newDigits);
+
+    if (value && index < 5) {
+      otpRefs.current[index + 1]?.focus();
+    }
+  };
+
+  const handleOtpKeyDown = (index: number, e: React.KeyboardEvent) => {
+    if (e.key === "Backspace" && !otpDigits[index] && index > 0) {
+      otpRefs.current[index - 1]?.focus();
+    }
+  };
+
+  const handleOtpPaste = (e: React.ClipboardEvent) => {
+    e.preventDefault();
+    const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
+    if (!pasted) return;
+    const newDigits = [...otpDigits];
+    for (let i = 0; i < 6; i++) {
+      newDigits[i] = pasted[i] || "";
+    }
+    setOtpDigits(newDigits);
+    const focusIndex = Math.min(pasted.length, 5);
+    otpRefs.current[focusIndex]?.focus();
+  };
+
+  const handleVerifyOtp = async () => {
+    const token = otpDigits.join("");
+    if (token.length !== 6) {
+      setError("Ingresa los 6 dígitos del código.");
+      return;
+    }
+
+    setError("");
+    setInfo("");
+    setLoading(true);
+
+    const { error } = await supabase.auth.verifyOtp({
+      email,
+      token,
+      type: "signup",
+    });
+
+    if (error) {
+      setError("Código incorrecto o expirado. Intenta de nuevo.");
+    }
+    setLoading(false);
+  };
+
+  const handleResendCode = async () => {
+    setError("");
+    setInfo("");
+    setLoading(true);
+
+    const { error } = await supabase.auth.resend({
+      type: "signup",
+      email,
+    });
+
+    if (error) {
+      setError("No se pudo reenviar el código. Intenta más tarde.");
+    } else {
+      setInfo("Código reenviado. Revisa tu bandeja de entrada.");
+    }
+    setLoading(false);
+  };
+
+  // Landing view
   if (view === "landing") {
     return (
       <div className="dark flex min-h-screen flex-col items-center justify-center bg-background px-4">
@@ -79,18 +155,14 @@ export default function Auth() {
               <Bot className="h-10 w-10 text-primary" />
             </div>
           </div>
-
           <div>
             <h1 className="text-4xl font-extrabold tracking-tight">
               <span className="text-foreground">Screen</span>
               <span className="text-primary">Mentor</span>
               <span className="text-foreground"> AI</span>
             </h1>
-            <p className="mt-3 text-muted-foreground">
-              Tu mentor digital en tiempo real
-            </p>
+            <p className="mt-3 text-muted-foreground">Tu mentor digital en tiempo real</p>
           </div>
-
           <div className="space-y-3">
             <button
               onClick={() => { resetForm(); setView("login"); }}
@@ -110,6 +182,82 @@ export default function Auth() {
     );
   }
 
+  // OTP verification view
+  if (view === "verify-otp") {
+    return (
+      <div className="dark flex min-h-screen flex-col items-center justify-center bg-background px-4">
+        <div className="w-full max-w-sm space-y-6">
+          <button
+            onClick={() => { resetForm(); setView("register"); }}
+            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Volver
+          </button>
+
+          <div className="text-center space-y-3">
+            <div className="flex justify-center">
+              <div className="h-14 w-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center">
+                <ShieldCheck className="h-7 w-7 text-primary" />
+              </div>
+            </div>
+            <h2 className="text-2xl font-bold text-foreground">Verifica tu correo</h2>
+            <p className="text-sm text-muted-foreground">
+              Ingresa el código de 6 dígitos enviado a <span className="text-foreground font-medium">{email}</span>
+            </p>
+          </div>
+
+          <div className="flex justify-center gap-2" onPaste={handleOtpPaste}>
+            {otpDigits.map((digit, i) => (
+              <input
+                key={i}
+                ref={(el) => { otpRefs.current[i] = el; }}
+                type="text"
+                inputMode="numeric"
+                maxLength={1}
+                value={digit}
+                onChange={(e) => handleOtpChange(i, e.target.value)}
+                onKeyDown={(e) => handleOtpKeyDown(i, e)}
+                className="w-12 h-14 rounded-xl border border-border bg-card text-center text-xl font-bold text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+              />
+            ))}
+          </div>
+
+          {error && (
+            <div className="rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+              {error}
+            </div>
+          )}
+
+          {info && (
+            <div className="rounded-xl border border-primary/30 bg-primary/10 px-4 py-3 text-sm text-primary">
+              {info}
+            </div>
+          )}
+
+          <button
+            onClick={handleVerifyOtp}
+            disabled={loading}
+            className="w-full rounded-xl bg-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground transition-all hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          >
+            {loading && <Loader2 className="h-4 w-4 animate-spin" />}
+            Verificar código
+          </button>
+
+          <button
+            onClick={handleResendCode}
+            disabled={loading}
+            className="w-full flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50"
+          >
+            <RefreshCw className="h-4 w-4" />
+            Reenviar código
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Login / Register view
   const isLogin = view === "login";
 
   return (
