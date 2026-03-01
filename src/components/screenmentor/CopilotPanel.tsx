@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback } from "react";
-import { Monitor, MonitorOff, Mic, X, Minus, GripHorizontal, SkipForward, RotateCcw, Square } from "lucide-react";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { Monitor, MonitorOff, Mic, X, Minus, GripHorizontal, SkipForward, RotateCcw, Square, Upload, ImageIcon, Smartphone } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
 import { useScreenCapture } from "@/hooks/useScreenCapture";
@@ -7,6 +7,7 @@ import { useVoiceInput } from "@/hooks/useVoiceInput";
 import { useTTS } from "@/hooks/useTTS";
 import { useDraggable } from "@/hooks/useDraggable";
 import { useResizable } from "@/hooks/useResizable";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { SoftwareSelector } from "./SoftwareSelector";
 import { LevelSelector } from "./LevelSelector";
 import { ResponseArea } from "./ResponseArea";

@@ -2,8 +2,10 @@ import { useState, useRef, useCallback } from "react";
 
 export function useScreenCapture() {
   const [isSharing, setIsSharing] = useState(false);
+  const [hasManualCapture, setHasManualCapture] = useState(false);
   const streamRef = useRef<MediaStream | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const manualSnapshotRef = useRef<string | null>(null);
 
   const startCapture = useCallback(async () => {
     try {
@@ -12,7 +14,6 @@ export function useScreenCapture() {
       });
       streamRef.current = stream;
 
-      // Create hidden video element
       const video = document.createElement("video");
       video.srcObject = stream;
       video.muted = true;
@@ -21,7 +22,6 @@ export function useScreenCapture() {
 
       setIsSharing(true);
 
-      // Listen for user stopping share
       stream.getVideoTracks()[0].addEventListener("ended", () => {
         stopCapture();
       });
@@ -41,12 +41,26 @@ export function useScreenCapture() {
     setIsSharing(false);
   }, []);
 
+  const setManualCapture = useCallback((base64: string) => {
+    manualSnapshotRef.current = base64;
+    setHasManualCapture(true);
+  }, []);
+
+  const clearManualCapture = useCallback(() => {
+    manualSnapshotRef.current = null;
+    setHasManualCapture(false);
+  }, []);
+
   const captureSnapshot = useCallback((): string | null => {
+    // Prefer manual capture (mobile upload) if available
+    if (manualSnapshotRef.current) {
+      return manualSnapshotRef.current;
+    }
+
     const video = videoRef.current;
     if (!video) return null;
 
     const canvas = document.createElement("canvas");
-    // Compress: resize to max 800px wide
     const scale = Math.min(1, 800 / video.videoWidth);
     canvas.width = video.videoWidth * scale;
     canvas.height = video.videoHeight * scale;
@@ -55,10 +69,9 @@ export function useScreenCapture() {
     if (!ctx) return null;
     ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-    // JPEG at 60% quality for fast transfer
     const dataUrl = canvas.toDataURL("image/jpeg", 0.6);
-    return dataUrl.split(",")[1]; // return base64 only
+    return dataUrl.split(",")[1];
   }, []);
 
-  return { isSharing, startCapture, stopCapture, captureSnapshot };
+  return { isSharing, hasManualCapture, startCapture, stopCapture, captureSnapshot, setManualCapture, clearManualCapture };
 }
