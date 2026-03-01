@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import { Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -8,6 +9,15 @@ interface ResponseAreaProps {
 }
 
 export function ResponseArea({ steps, currentStep, isLoading }: ResponseAreaProps) {
+  const stepRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  useEffect(() => {
+    const el = stepRefs.current[currentStep];
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }, [currentStep, steps]);
+
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center gap-3 py-10">
@@ -39,16 +49,22 @@ export function ResponseArea({ steps, currentStep, isLoading }: ResponseAreaProp
         {steps.map((step, i) => (
           <div
             key={i}
+            ref={(el) => { stepRefs.current[i] = el; }}
             className={cn(
-              "rounded-lg border p-3 text-sm leading-relaxed transition-all duration-300",
+              "rounded-lg border p-3 text-sm leading-relaxed transition-all duration-500 ease-in-out",
               i === currentStep
-                ? "border-primary bg-primary/10 text-foreground ring-1 ring-primary/30"
+                ? "border-primary bg-primary/10 text-foreground ring-2 ring-primary/40 shadow-md shadow-primary/10 scale-[1.01] border-l-4 border-l-primary"
                 : i < currentStep
-                  ? "border-border bg-card text-muted-foreground"
-                  : "border-border bg-card text-muted-foreground opacity-60"
+                  ? "border-border bg-muted/30 text-muted-foreground"
+                  : "border-border bg-card text-muted-foreground opacity-50"
             )}
           >
-            <span className="mr-2 font-semibold text-primary">{i + 1}.</span>
+            <span className={cn(
+              "mr-2 font-semibold transition-colors duration-300",
+              i === currentStep ? "text-primary" : "text-muted-foreground"
+            )}>
+              {i + 1}.
+            </span>
             {step}
           </div>
         ))}
