@@ -58,9 +58,9 @@ serve(async (req) => {
   try {
     const { image_base64, texto_transcrito, nivel_usuario, software_seleccionado } = await req.json();
 
-    const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
-    if (!OPENAI_API_KEY) {
-      throw new Error("OPENAI_API_KEY is not configured");
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+    if (!LOVABLE_API_KEY) {
+      throw new Error("LOVABLE_API_KEY is not configured");
     }
 
     const nivel = nivel_usuario?.toLowerCase() || "basico";
@@ -85,42 +85,45 @@ INSTRUCCIONES DE FORMATO:
 - Sé preciso y práctico.
 - Analiza la captura de pantalla proporcionada para contextualizar tu respuesta al estado actual de la interfaz del usuario.`;
 
-    // Build input for Responses API
-    const input: any[] = [];
+    const messages: any[] = [
+      { role: "system", content: systemPrompt },
+    ];
 
+    // Build user message with image if provided
     if (image_base64) {
-      input.push({
+      messages.push({
         role: "user",
         content: [
           {
-            type: "input_image",
-            image_url: `data:image/jpeg;base64,${image_base64}`,
-            detail: "low",
+            type: "image_url",
+            image_url: {
+              url: `data:image/jpeg;base64,${image_base64}`,
+              detail: "low",
+            },
           },
           {
-            type: "input_text",
+            type: "text",
             text: texto_transcrito || "¿Qué puedo hacer aquí?",
           },
         ],
       });
     } else {
-      input.push({
+      messages.push({
         role: "user",
         content: texto_transcrito || "¿Qué puedo hacer aquí?",
       });
     }
 
-    const response = await fetch("https://api.openai.com/v1/responses", {
+    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${OPENAI_API_KEY}`,
+        Authorization: `Bearer ${LOVABLE_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "gpt-4o",
-        instructions: systemPrompt,
-        input,
-        max_output_tokens: 1024,
+        model: "openai/gpt-5",
+        messages,
+        max_tokens: 1024,
         temperature: 0.3,
       }),
     });
@@ -143,8 +146,7 @@ INSTRUCCIONES DE FORMATO:
     }
 
     const data = await response.json();
-    const outputMessage = data.output?.find((o: any) => o.type === "message");
-    const content = outputMessage?.content?.find((c: any) => c.type === "output_text")?.text || "No se pudo generar una respuesta.";
+    const content = data.choices?.[0]?.message?.content || "No se pudo generar una respuesta.";
 
     return new Response(JSON.stringify({ steps: content }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
