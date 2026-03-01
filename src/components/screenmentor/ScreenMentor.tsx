@@ -2,13 +2,21 @@ import { useState } from "react";
 import { FloatingButton } from "./FloatingButton";
 import { CopilotPanel } from "./CopilotPanel";
 
+type ViewState = "closed" | "minimized" | "open";
+
 export function ScreenMentor() {
-  const [isOpen, setIsOpen] = useState(false);
+  const [viewState, setViewState] = useState<ViewState>("closed");
 
   return (
     <>
-      <CopilotPanel isOpen={isOpen} onClose={() => setIsOpen(false)} />
-      <FloatingButton isOpen={isOpen} onClick={() => setIsOpen(true)} />
+      <CopilotPanel
+        isOpen={viewState === "open"}
+        onClose={() => setViewState("closed")}
+        onMinimize={() => setViewState("minimized")}
+      />
+      {viewState !== "open" && (
+        <FloatingButton onClick={() => setViewState("open")} />
+      )}
     </>
   );
 }
