@@ -28,8 +28,11 @@ export function CopilotPanel({ isOpen, onClose, onMinimize }: CopilotPanelProps)
   const [isLoading, setIsLoading] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
 
-  const { isSharing, startCapture, stopCapture, captureSnapshot } = useScreenCapture();
+  const { isSharing, hasManualCapture, startCapture, stopCapture, captureSnapshot, setManualCapture, clearManualCapture } = useScreenCapture();
   const { isListening, transcript, startListening, stopListening, clearTranscript } = useVoiceInput();
+  const { speak, stop: stopTTS } = useTTS();
+  const isMobile = useIsMobile();
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { speak, stop: stopTTS } = useTTS();
 
   const { position, onMouseDown } = useDraggable({
