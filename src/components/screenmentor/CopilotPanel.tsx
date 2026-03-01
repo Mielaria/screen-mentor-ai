@@ -131,6 +131,23 @@ export function CopilotPanel({ isOpen, onClose, onMinimize }: CopilotPanelProps)
     }
   };
 
+  const handleFileUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      const base64 = result.split(",")[1];
+      if (base64) {
+        setManualCapture(base64);
+      }
+    };
+    reader.readAsDataURL(file);
+    // Reset input so same file can be re-selected
+    e.target.value = "";
+  }, [setManualCapture]);
+
   if (!isOpen) return null;
 
   const isLastStep = currentStep >= steps.length - 1;
