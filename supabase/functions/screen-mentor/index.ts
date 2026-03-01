@@ -101,8 +101,12 @@ INSTRUCCIONES DE FORMATO OBLIGATORIAS:
 - Responde UNICAMENTE en texto plano simple. NO utilices ningun tipo de formato Markdown.
 - Esta estrictamente prohibido usar: asteriscos (*), dobles asteriscos (**), guiones para listas (-), subrayado (_), backticks, almohadillas (#), encabezados, cursivas, negritas, listas con vinetas, bloques de codigo, simbolos decorativos, emojis.
 - Responde SIEMPRE en espanol.
-- La respuesta debe ser UNICAMENTE una lista numerada.
-- Cada paso debe comenzar unicamente con un numero seguido de punto y espacio. Ejemplo: "1. Abre el panel derecho."
+- La respuesta debe ser UNICAMENTE una secuencia de pasos en texto plano, SIN numeros al inicio de cada paso.
+- Cada paso debe ser una oracion independiente en una linea separada. NO uses numeros, vinetas, guiones ni ningun marcador al inicio.
+- Ejemplo correcto:
+  Abre el panel derecho.
+  Haz clic en la herramienta texto.
+  Selecciona el color deseado.
 - No agregues lineas decorativas, texto antes de la lista, texto despues de la lista, titulos, encabezados, explicaciones fuera de los pasos, advertencias ni notas adicionales.
 - Se preciso y practico.
 - Si generas cualquier simbolo de formato o estructura Markdown, la respuesta sera invalida.`;
