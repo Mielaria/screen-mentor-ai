@@ -1,9 +1,9 @@
 import { cn } from "@/lib/utils";
 
 const LEVELS = [
-  { id: "basico", label: "Básico", color: "text-blue-400", dot: "bg-blue-400" },
-  { id: "intermedio", label: "Intermedio", color: "text-yellow-400", dot: "bg-yellow-400" },
-  { id: "avanzado", label: "Avanzado", color: "text-red-400", dot: "bg-red-400" },
+  { id: "basico", label: "Básico", dotClass: "bg-emerald-400" },
+  { id: "intermedio", label: "Intermedio", dotClass: "bg-yellow-400" },
+  { id: "avanzado", label: "Avanzado", dotClass: "bg-red-400" },
 ] as const;
 
 interface LevelSelectorProps {
@@ -14,7 +14,7 @@ interface LevelSelectorProps {
 export function LevelSelector({ selected, onSelect }: LevelSelectorProps) {
   return (
     <div className="space-y-2">
-      <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+      <span className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
         Nivel
       </span>
       <div className="grid grid-cols-3 gap-2">
@@ -23,16 +23,14 @@ export function LevelSelector({ selected, onSelect }: LevelSelectorProps) {
             key={level.id}
             onClick={() => onSelect(level.id)}
             className={cn(
-              "flex items-center justify-center gap-1.5 rounded-lg border p-2.5 text-xs font-medium transition-all duration-200",
+              "flex flex-col items-center gap-1.5 rounded-xl border px-3 py-2.5 text-xs font-medium transition-all duration-200",
               selected === level.id
-                ? "border-primary bg-primary/10"
-                : "border-border bg-card hover:border-primary/50 hover:bg-accent"
+                ? "border-primary bg-primary/10 text-foreground"
+                : "border-border bg-accent/50 text-muted-foreground hover:border-primary/40 hover:text-foreground"
             )}
           >
-            <span className={cn("h-2 w-2 rounded-full", level.dot)} />
-            <span className={selected === level.id ? level.color : "text-muted-foreground"}>
-              {level.label}
-            </span>
+            <span className={cn("h-2.5 w-2.5 rounded-full", level.dotClass)} />
+            {level.label}
           </button>
         ))}
       </div>

@@ -7,8 +7,8 @@ export function ScreenMentor() {
 
   return (
     <>
-      <CopilotPanel isOpen={isOpen} />
-      <FloatingButton isOpen={isOpen} onClick={() => setIsOpen(!isOpen)} />
+      <CopilotPanel isOpen={isOpen} onClose={() => setIsOpen(false)} />
+      <FloatingButton isOpen={isOpen} onClick={() => setIsOpen(true)} />
     </>
   );
 }
