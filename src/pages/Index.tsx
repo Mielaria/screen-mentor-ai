@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { ScreenMentor } from "@/components/screenmentor/ScreenMentor";
 import { Monitor, Mic, Bot, LogOut } from "lucide-react";
+import { FeedbackSection } from "@/components/FeedbackSection";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 
