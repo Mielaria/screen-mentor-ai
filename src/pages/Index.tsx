@@ -101,6 +101,9 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Feedback */}
+      <FeedbackSection userName={fullName} />
+
       {/* Info section */}
       <section className="border-t border-border bg-card/50 px-4 py-20">
         <div className="mx-auto max-w-2xl text-center space-y-6">
