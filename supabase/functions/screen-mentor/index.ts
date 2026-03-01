@@ -38,27 +38,6 @@ NIVEL DE DETALLE:
 - Sé lo más breve y directo posible.`,
 };
 
-const SOFTWARE_SCOPES: Record<string, string> = {
-  photoshop: `Funciones soportadas en esta demo de Photoshop:
-- Eliminar fondo
-- Recortar imagen
-- Agregar texto
-- Cambiar tamaño
-- Exportar imagen`,
-
-  canva: `Funciones soportadas en esta demo de Canva:
-- Cambiar color de fondo
-- Añadir texto
-- Añadir elementos u objetos
-- Modificar tamaño o tipografía
-- Exportar diseño`,
-
-  shapr3d: `Funciones soportadas en esta demo de Shapr3D:
-- Crear boceto básico
-- Modificar medidas (ancho, alto, largo)
-- Realizar extrusión
-- Alinear objetos`,
-};
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -77,9 +56,6 @@ serve(async (req) => {
     const software = software_seleccionado?.toLowerCase() || "photoshop";
 
     const levelPrompt = LEVEL_PROMPTS[nivel] || LEVEL_PROMPTS.basico;
-    const scopeInfo = SOFTWARE_SCOPES[software] || "";
-
-    const outOfScope = `Si la solicitud del usuario está fuera de las funciones soportadas o no corresponde al software seleccionado, responde EXACTAMENTE: "Esta demo está optimizada para funciones específicas de Photoshop, Canva y Shapr3D."`;
 
     const systemPrompt = `Eres un mentor tecnico preciso y riguroso especializado en Canva, Photoshop y Shapr3D.
 
