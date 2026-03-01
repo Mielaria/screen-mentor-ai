@@ -19,7 +19,7 @@ interface CopilotPanelProps {
 }
 
 export function CopilotPanel({ isOpen, onClose, onMinimize }: CopilotPanelProps) {
-  const { signOut } = useAuth();
+  
   const [software, setSoftware] = useState("photoshop");
   const [level, setLevel] = useState("basico");
   const [steps, setSteps] = useState<string[]>([]);
