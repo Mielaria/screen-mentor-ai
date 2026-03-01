@@ -31,7 +31,7 @@ export function ResponseArea({ steps, currentStep, isLoading }: ResponseAreaProp
   }
 
   return (
-    <div className="space-y-3 overflow-y-auto pr-1">
+    <div className="space-y-3 pr-1">
       <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
         Instrucciones
       </span>
