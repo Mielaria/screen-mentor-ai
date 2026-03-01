@@ -33,7 +33,6 @@ export function CopilotPanel({ isOpen, onClose, onMinimize }: CopilotPanelProps)
   const { speak, stop: stopTTS } = useTTS();
   const isMobile = useIsMobile();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { speak, stop: stopTTS } = useTTS();
 
   const { position, onMouseDown } = useDraggable({
     x: Math.max(40, window.innerWidth - 400),
