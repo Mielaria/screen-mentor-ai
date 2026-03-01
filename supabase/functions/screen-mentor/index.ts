@@ -58,9 +58,9 @@ serve(async (req) => {
   try {
     const { image_base64, texto_transcrito, nivel_usuario, software_seleccionado } = await req.json();
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) {
-      throw new Error("LOVABLE_API_KEY is not configured");
+    const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
+    if (!OPENAI_API_KEY) {
+      throw new Error("OPENAI_API_KEY is not configured");
     }
 
     const nivel = nivel_usuario?.toLowerCase() || "basico";
