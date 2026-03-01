@@ -1,10 +1,57 @@
+import { useEffect, useState } from "react";
 import { ScreenMentor } from "@/components/screenmentor/ScreenMentor";
-import { Monitor, Mic, Bot } from "lucide-react";
+import { Monitor, Mic, Bot, LogOut } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+
+const greetings = [
+  (name: string) => `Bienvenido, ${name}.`,
+  (name: string) => `Hola, ${name}. Listo para trabajar.`,
+  (name: string) => `Bienvenido de nuevo, ${name}.`,
+  (name: string) => `Hola, ${name}. ¿Cómo te puedo ayudar hoy?`,
+];
 
 const Index = () => {
+  const { user, signOut } = useAuth();
+  const [fullName, setFullName] = useState("");
+  const [greeting, setGreeting] = useState("");
+
+  useEffect(() => {
+    if (!user) return;
+    const fetchProfile = async () => {
+      const { data } = await supabase
+        .from("profiles")
+        .select("full_name")
+        .eq("user_id", user.id)
+        .single();
+      const name = data?.full_name || user.user_metadata?.full_name || "Usuario";
+      setFullName(name);
+      setGreeting(greetings[Math.floor(Math.random() * greetings.length)](name));
+    };
+    fetchProfile();
+  }, [user]);
+
   return (
     <div className="dark flex min-h-screen flex-col items-center justify-center bg-background px-4 relative">
+      {/* Top bar with logout */}
+      <div className="absolute top-4 right-4 z-50">
+        <button
+          onClick={signOut}
+          className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-destructive/20 hover:text-destructive"
+        >
+          <LogOut className="h-4 w-4" />
+          Cerrar sesión
+        </button>
+      </div>
+
       <div className="text-center space-y-8 max-w-2xl">
+        {/* Personalized greeting */}
+        {greeting && (
+          <p className="text-xl md:text-2xl font-semibold text-foreground animate-fade-in">
+            {greeting}
+          </p>
+        )}
+
         {/* Badge */}
         <div className="flex justify-center">
           <span className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-5 py-2 text-sm font-medium text-primary">
