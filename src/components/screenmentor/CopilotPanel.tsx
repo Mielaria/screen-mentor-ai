@@ -40,7 +40,6 @@ export function CopilotPanel({ isOpen, onClose, onMinimize }: CopilotPanelProps)
   });
   const { size, onResizeStart, onResizeTouchStart } = useResizable(
     isMobile ? { width: Math.min(320, window.innerWidth - 20), height: 480 } : { width: 340, height: 520 },
-    { width: 340, height: 520 },
     { width: 280, height: 360 },
     { width: 600, height: 800 }
   );
