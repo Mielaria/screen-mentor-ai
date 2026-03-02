@@ -98,6 +98,22 @@ const Index = () => {
               Iniciar ScreenMentor
             </button>
           </div>
+
+          {/* Compatibility indicator */}
+          <div className="mx-auto max-w-xs rounded-xl border border-border bg-card/60 px-6 py-4 text-center backdrop-blur-sm">
+            <div className="flex justify-center gap-5 mb-3">
+              {/* Windows icon */}
+              <svg viewBox="0 0 24 24" className="h-6 w-6 text-muted-foreground" fill="currentColor">
+                <path d="M3 12V6.75l7-1.05V12H3zm8-1.35V5.55l10-1.55V12H11V10.65zM3 13h7v6.3l-7-1.05V13zm8 0h10v7l-10-1.55V13z"/>
+              </svg>
+              {/* Android icon */}
+              <svg viewBox="0 0 24 24" className="h-6 w-6 text-muted-foreground" fill="currentColor">
+                <path d="M6 18c0 .55.45 1 1 1h1v3.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5V19h2v3.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5V19h1c.55 0 1-.45 1-1V8H6v10zM3.5 8C2.67 8 2 8.67 2 9.5v7c0 .83.67 1.5 1.5 1.5S5 17.33 5 16.5v-7C5 8.67 4.33 8 3.5 8zm17 0c-.83 0-1.5.67-1.5 1.5v7c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5v-7c0-.83-.67-1.5-1.5-1.5zm-4.97-5.84l1.3-1.3c.2-.2.2-.51 0-.71-.2-.2-.51-.2-.71 0l-1.48 1.48A5.84 5.84 0 0012 1c-.96 0-1.86.23-2.66.63L7.85.15c-.2-.2-.51-.2-.71 0-.2.2-.2.51 0 .71l1.31 1.31A5.983 5.983 0 006 7h12c0-2.12-1.1-3.98-2.47-4.84zM10 5H9V4h1v1zm5 0h-1V4h1v1z"/>
+              </svg>
+            </div>
+            <p className="text-sm font-medium text-foreground">Optimizado para Windows y Android</p>
+            <p className="mt-1 text-xs text-muted-foreground">En dispositivos iPhone algunas funciones pueden presentar limitaciones.</p>
+          </div>
         </div>
       </section>
 
