@@ -27,7 +27,7 @@ export default function Auth() {
     setInfo("");
     setLoading(true);
 
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
     if (error) {
       if (error.message.includes("Email not confirmed")) {
@@ -37,6 +37,9 @@ export default function Auth() {
       } else {
         setError(error.message);
       }
+    } else if (data.user && !data.user.email_confirmed_at) {
+      await supabase.auth.signOut();
+      setError("Debes verificar tu correo electrónico antes de iniciar sesión.");
     }
     setLoading(false);
   };
