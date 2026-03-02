@@ -34,12 +34,12 @@ export function CopilotPanel({ isOpen, onClose, onMinimize }: CopilotPanelProps)
   const isMobile = useIsMobile();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const { position, onMouseDown } = useDraggable({
-    x: Math.max(40, window.innerWidth - 400),
-    y: 40,
+  const { position, onMouseDown, onTouchStart } = useDraggable({
+    x: isMobile ? 10 : Math.max(40, window.innerWidth - 400),
+    y: isMobile ? 10 : 40,
   });
-  const { size, onResizeStart } = useResizable(
-    { width: 340, height: 520 },
+  const { size, onResizeStart, onResizeTouchStart } = useResizable(
+    isMobile ? { width: Math.min(320, window.innerWidth - 20), height: 480 } : { width: 340, height: 520 },
     { width: 280, height: 360 },
     { width: 600, height: 800 }
   );
@@ -166,7 +166,8 @@ export function CopilotPanel({ isOpen, onClose, onMinimize }: CopilotPanelProps)
       {/* Draggable Header */}
       <div
         onMouseDown={onMouseDown}
-        className="flex items-center justify-between border-b border-border px-3 py-2.5 bg-card/80 cursor-grab active:cursor-grabbing select-none shrink-0"
+        onTouchStart={onTouchStart}
+        className="flex items-center justify-between border-b border-border px-3 py-2.5 bg-card/80 cursor-grab active:cursor-grabbing select-none shrink-0 touch-none"
       >
         <div className="flex items-center gap-2">
           <GripHorizontal className="h-3.5 w-3.5 text-muted-foreground" />
@@ -313,10 +314,11 @@ export function CopilotPanel({ isOpen, onClose, onMinimize }: CopilotPanelProps)
       {/* Resize handle */}
       <div
         onMouseDown={onResizeStart}
-        className="absolute bottom-0 right-0 h-5 w-5 cursor-se-resize flex items-end justify-end pr-0.5 pb-0.5"
+        onTouchStart={onResizeTouchStart}
+        className="absolute bottom-0 right-0 h-8 w-8 cursor-se-resize flex items-end justify-end pr-1 pb-1 touch-none"
         title="Redimensionar"
       >
-        <svg width="10" height="10" viewBox="0 0 10 10" className="text-muted-foreground/50">
+        <svg width="12" height="12" viewBox="0 0 10 10" className="text-muted-foreground/50">
           <path d="M9 1L1 9M9 5L5 9M9 9L9 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
         </svg>
       </div>
