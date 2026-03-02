@@ -65,7 +65,11 @@ export default function Auth() {
     if (error) {
       setError(error.message);
     } else {
-      setInfo("¡Cuenta creada! Revisa tu correo electrónico para verificar tu cuenta antes de iniciar sesión.");
+      setInfo("Cuenta creada correctamente. Revisa tu correo electrónico para verificar tu cuenta.");
+      setTimeout(() => {
+        resetForm();
+        setView("login");
+      }, 3000);
     }
     setLoading(false);
   };
