@@ -23,28 +23,52 @@ export function useResizable(
     e.stopPropagation();
   }, [size]);
 
+  const onResizeTouchStart = useCallback((e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    isResizing.current = true;
+    startPos.current = { x: touch.clientX, y: touch.clientY };
+    startSize.current = { ...size };
+    e.stopPropagation();
+  }, [size]);
+
   useEffect(() => {
-    const onMouseMove = (e: MouseEvent) => {
-      if (!isResizing.current) return;
-      const dx = e.clientX - startPos.current.x;
-      const dy = e.clientY - startPos.current.y;
+    const calc = (clientX: number, clientY: number) => {
+      const dx = clientX - startPos.current.x;
+      const dy = clientY - startPos.current.y;
       setSize({
         width: Math.min(maxSize.width, Math.max(minSize.width, startSize.current.width + dx)),
         height: Math.min(maxSize.height, Math.max(minSize.height, startSize.current.height + dy)),
       });
     };
 
-    const onMouseUp = () => {
+    const onMouseMove = (e: MouseEvent) => {
+      if (!isResizing.current) return;
+      calc(e.clientX, e.clientY);
+    };
+
+    const onTouchMove = (e: TouchEvent) => {
+      if (!isResizing.current) return;
+      e.preventDefault();
+      calc(e.touches[0].clientX, e.touches[0].clientY);
+    };
+
+    const onEnd = () => {
       isResizing.current = false;
     };
 
     window.addEventListener("mousemove", onMouseMove);
-    window.addEventListener("mouseup", onMouseUp);
+    window.addEventListener("mouseup", onEnd);
+    window.addEventListener("touchmove", onTouchMove, { passive: false });
+    window.addEventListener("touchend", onEnd);
+    window.addEventListener("touchcancel", onEnd);
     return () => {
       window.removeEventListener("mousemove", onMouseMove);
-      window.removeEventListener("mouseup", onMouseUp);
+      window.removeEventListener("mouseup", onEnd);
+      window.removeEventListener("touchmove", onTouchMove);
+      window.removeEventListener("touchend", onEnd);
+      window.removeEventListener("touchcancel", onEnd);
     };
   }, [minSize, maxSize]);
 
-  return { size, onResizeStart };
+  return { size, onResizeStart, onResizeTouchStart };
 }
