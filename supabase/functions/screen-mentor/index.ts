@@ -143,7 +143,7 @@ Si la solicitud no corresponde a Canva, Photoshop o Shapr3D, responde exactament
 
     if (!response.ok) {
       const errText = await response.text();
-      console.error("OpenAI API error:", response.status, errText);
+      console.error("AI Gateway error:", response.status, errText);
       
       if (response.status === 429) {
         return new Response(JSON.stringify({ error: "Límite de solicitudes excedido. Intenta de nuevo en unos segundos." }), {
