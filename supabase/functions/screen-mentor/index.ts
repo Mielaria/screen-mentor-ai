@@ -134,7 +134,7 @@ Si la solicitud no corresponde a Canva, Photoshop o Shapr3D, responde exactament
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "gpt-4o",
+        model: "gpt-4o-search-preview",
         messages,
         max_tokens: 1024,
         temperature: 0.3,
