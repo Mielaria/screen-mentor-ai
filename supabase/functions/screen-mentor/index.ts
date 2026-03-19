@@ -52,10 +52,7 @@ serve(async (req) => {
   try {
     const { image_base64, texto_transcrito, nivel_usuario, software_seleccionado } = await req.json();
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
-    const useGateway = Boolean(LOVABLE_API_KEY);
-    const apiKey = LOVABLE_API_KEY || OPENAI_API_KEY;
+    const apiKey = Deno.env.get("OPENAI_API_KEY");
 
     if (!apiKey) {
       throw new Error("No AI API key is configured");
