@@ -44,7 +44,6 @@ HERRAMIENTAS NO VISIBLES (NIVEL BASICO):
 - Si una herramienta no esta visible, da el atajo de teclado para mostrarla. Si no hay atajo, indica la ruta de menu en una sola linea.`,
 };
 
-
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -53,9 +52,13 @@ serve(async (req) => {
   try {
     const { image_base64, texto_transcrito, nivel_usuario, software_seleccionado } = await req.json();
 
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
-    if (!OPENAI_API_KEY) {
-      throw new Error("OPENAI_API_KEY is not configured");
+    const useGateway = Boolean(LOVABLE_API_KEY);
+    const apiKey = LOVABLE_API_KEY || OPENAI_API_KEY;
+
+    if (!apiKey) {
+      throw new Error("No AI API key is configured");
     }
 
     const nivel = nivel_usuario?.toLowerCase() || "basico";
@@ -114,11 +117,8 @@ FORMATO DE RESPUESTA:
 
 Si la solicitud no corresponde a Canva, Photoshop o Shapr3D, responde exactamente: "Esta aplicacion esta optimizada unicamente para Canva, Photoshop y Shapr3D."`;
 
-    const messages: any[] = [
-      { role: "system", content: systemPrompt },
-    ];
+    const messages: any[] = [{ role: "system", content: systemPrompt }];
 
-    // Build user message with image if provided
     if (image_base64) {
       messages.push({
         role: "user",
@@ -143,25 +143,28 @@ Si la solicitud no corresponde a Canva, Photoshop o Shapr3D, responde exactament
       });
     }
 
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${OPENAI_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "gpt-4o-mini-search-preview-2025-03-11",
-        messages,
-        max_tokens: 1024,
-      }),
-    });
+    const response = await fetch(
+      useGateway ? "https://ai.gateway.lovable.dev/v1/chat/completions" : "https://api.openai.com/v1/chat/completions",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: useGateway ? "google/gemini-2.5-flash" : "gpt-4o-mini",
+          messages,
+          max_tokens: 1024,
+        }),
+      }
+    );
 
     if (!response.ok) {
       const errText = await response.text();
-      console.error("OpenAI API error:", response.status, errText);
-      
+      console.error(useGateway ? "AI gateway error:" : "OpenAI API error:", response.status, errText);
+
       if (response.status === 429) {
-        return new Response(JSON.stringify({ error: "Límite de solicitudes excedido. Intenta de nuevo en unos segundos." }), {
+        return new Response(JSON.stringify({ error: "El asistente esta temporalmente ocupado. Intenta de nuevo en unos segundos." }), {
           status: 429,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
