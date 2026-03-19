@@ -21,6 +21,7 @@ const SOFTWARE_OPTIONS: SoftwareOption[] = [
   { id: "canva", label: "Canva", logo: canvaLogo },
   { id: "shapr3d", label: "Shapr3D", logo: shapr3dLogo },
   { id: "blender", label: "Blender 3D", logo: blenderLogo },
+  { id: "illustrator", label: "Illustrator", logo: illustratorLogo },
 ];
 
 interface SoftwareSelectorProps {
