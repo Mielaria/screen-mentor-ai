@@ -92,7 +92,7 @@ export function SoftwareSelector({ selected, onSelect }: SoftwareSelectorProps) 
                   <img
                     src={sw.logo}
                     alt={sw.label}
-                    className="h-10 w-10 rounded-lg object-contain"
+                    className="h-16 w-16 rounded-lg object-contain"
                   />
                   <span
                     className={cn(
