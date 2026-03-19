@@ -140,21 +140,18 @@ Si la solicitud no corresponde a Canva, Photoshop o Shapr3D, responde exactament
       });
     }
 
-    const response = await fetch(
-      useGateway ? "https://ai.gateway.lovable.dev/v1/chat/completions" : "https://api.openai.com/v1/chat/completions",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: useGateway ? "google/gemini-2.5-flash" : "gpt-4o-mini",
-          messages,
-          max_tokens: 1024,
-        }),
-      }
-    );
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "gpt-4o-mini-search-preview-2025-03-11",
+        messages,
+        max_tokens: 1024,
+      }),
+    });
 
     if (!response.ok) {
       const errText = await response.text();
