@@ -155,7 +155,7 @@ Si la solicitud no corresponde a Canva, Photoshop o Shapr3D, responde exactament
 
     if (!response.ok) {
       const errText = await response.text();
-      console.error(useGateway ? "AI gateway error:" : "OpenAI API error:", response.status, errText);
+      console.error("OpenAI API error:", response.status, errText);
 
       if (response.status === 429) {
         return new Response(JSON.stringify({ error: "El asistente esta temporalmente ocupado. Intenta de nuevo en unos segundos." }), {
