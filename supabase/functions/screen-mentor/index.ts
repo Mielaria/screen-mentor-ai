@@ -22,27 +22,22 @@ NIVEL DE DETALLE:
 - Si hay que escribir algo, indica exactamente donde aparecera el cursor y que debe escribir.
 - Evita completamente los atajos de teclado. Solo usa clics y menus visibles.
 - Usa lenguaje cotidiano, evita jerga tecnica. Si necesitas usar un termino tecnico, explicalo inmediatamente. Ejemplo: "la capa (es decir, la seccion donde se organizan los elementos de tu diseno)".
-- Cada paso debe ser una sola accion concreta que el usuario pueda ejecutar sin dudar.
-
-HERRAMIENTAS NO VISIBLES (NIVEL BASICO):
-- Si una herramienta, panel o boton necesario NO esta visible en la captura, explica paso a paso como mostrarlo o activarlo con descripciones visuales completas (color, forma, ubicacion del menu donde se encuentra).
-- Describe visualmente que pasara al activarlo para que el usuario confirme que lo hizo bien.`,
+- Cada paso debe ser una sola accion concreta que el usuario pueda ejecutar sin dudar.`,
 
   intermedio: `Eres un mentor directo para usuarios con experiencia intermedia.
-- Se mas conciso, omite explicaciones obvias.
-- Usa terminologia estandar del software.
-- Manten pasos claros pero sin extenderte innecesariamente.
-- Puedes mencionar atajos de teclado comunes.
-- Si una herramienta necesaria NO esta visible en la captura, indica brevemente como abrirla (nombre del menu o ruta). Si SI esta visible, ve directo a la instruccion.`,
+- Sé más conciso, omite explicaciones obvias.
+- Usa terminología estándar del software.
+- Mantén pasos claros pero sin extenderte innecesariamente.
+- Puedes mencionar atajos de teclado comunes.`,
 
-  avanzado: `Eres un mentor tecnico para usuarios avanzados.
-- Prioriza atajos de teclado y comandos rapidos para todas las acciones, incluyendo abrir paneles o herramientas ocultas.
-- Usa terminologia tecnica sin explicarla.
-- Evita explicaciones basicas.
-- Solo describe rutas de menu como alternativa al atajo de teclado.
-- Se lo mas breve y directo posible.
-- Si una herramienta no esta visible, da el atajo de teclado para mostrarla. Si no hay atajo, indica la ruta de menu en una sola linea.`,
+  avanzado: `Eres un mentor técnico para usuarios avanzados.
+- Prioriza atajos de teclado y comandos rápidos.
+- Usa terminología técnica sin explicarla.
+- Evita explicaciones básicas.
+- Solo describe rutas de menú si es estrictamente necesario.
+- Sé lo más breve y directo posible.`,
 };
+
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -52,10 +47,9 @@ serve(async (req) => {
   try {
     const { image_base64, texto_transcrito, nivel_usuario, software_seleccionado } = await req.json();
 
-    const apiKey = Deno.env.get("OPENAI_API_KEY");
-
-    if (!apiKey) {
-      throw new Error("No AI API key is configured");
+    const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
+    if (!OPENAI_API_KEY) {
+      throw new Error("OPENAI_API_KEY is not configured");
     }
 
     const nivel = nivel_usuario?.toLowerCase() || "basico";
@@ -84,16 +78,6 @@ Si se proporciona una captura de pantalla, analiza cuidadosamente antes de respo
 4. Determina si hay un documento abierto o si es la pantalla inicial.
 5. Ajusta las instrucciones estrictamente a los elementos visibles.
 
-VERSION Y DOCUMENTACION:
-- Identifica la version del software visible en la captura (por menus, pantalla de inicio, barra de titulo o elementos de interfaz).
-- Basa tus instrucciones en la documentacion oficial de esa version especifica. Busca en Internet si es necesario.
-- Si no puedes determinar la version, pregunta al usuario cual version esta usando.
-- Menciona siempre a que version corresponden tus instrucciones al inicio de la respuesta.
-
-HERRAMIENTAS NO VISIBLES VS VISIBLES:
-- Si una herramienta o panel necesario para la tarea NO esta visible en la captura, explica primero como activarlo o mostrarlo (desde que menu, ruta o atajo segun el nivel del usuario).
-- Si la herramienta SI esta visible en la captura, ve directo a la instruccion sin explicar como encontrarla.
-
 REGLAS FUNDAMENTALES:
 - Solo da instrucciones basadas en lo que realmente es posible en ese software.
 - No inventes herramientas, botones o funciones que no existan.
@@ -114,8 +98,11 @@ FORMATO DE RESPUESTA:
 
 Si la solicitud no corresponde a Canva, Photoshop o Shapr3D, responde exactamente: "Esta aplicacion esta optimizada unicamente para Canva, Photoshop y Shapr3D."`;
 
-    const messages: any[] = [{ role: "system", content: systemPrompt }];
+    const messages: any[] = [
+      { role: "system", content: systemPrompt },
+    ];
 
+    // Build user message with image if provided
     if (image_base64) {
       messages.push({
         role: "user",
@@ -143,22 +130,23 @@ Si la solicitud no corresponde a Canva, Photoshop o Shapr3D, responde exactament
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${apiKey}`,
+        Authorization: `Bearer ${OPENAI_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "gpt-4o-mini-search-preview-2025-03-11",
+        model: "gpt-4o",
         messages,
         max_tokens: 1024,
+        temperature: 0.3,
       }),
     });
 
     if (!response.ok) {
       const errText = await response.text();
       console.error("OpenAI API error:", response.status, errText);
-
+      
       if (response.status === 429) {
-        return new Response(JSON.stringify({ error: "El asistente esta temporalmente ocupado. Intenta de nuevo en unos segundos." }), {
+        return new Response(JSON.stringify({ error: "Límite de solicitudes excedido. Intenta de nuevo en unos segundos." }), {
           status: 429,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
