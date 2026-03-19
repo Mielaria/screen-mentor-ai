@@ -6,6 +6,7 @@ import photoshopLogo from "@/assets/logos/photoshop.png";
 import canvaLogo from "@/assets/logos/canva.png";
 import shapr3dLogo from "@/assets/logos/shapr3d.png";
 import blenderLogo from "@/assets/logos/blender.png";
+import illustratorLogo from "@/assets/logos/illustrator.png";
 
 export interface SoftwareOption {
   id: string;
@@ -18,6 +19,7 @@ const SOFTWARE_OPTIONS: SoftwareOption[] = [
   { id: "canva", label: "Canva", logo: canvaLogo },
   { id: "shapr3d", label: "Shapr3D", logo: shapr3dLogo },
   { id: "blender", label: "Blender 3D", logo: blenderLogo },
+  { id: "illustrator", label: "Illustrator", logo: illustratorLogo },
 ];
 
 interface SoftwareSelectorProps {
