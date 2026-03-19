@@ -137,7 +137,6 @@ Si la solicitud no corresponde a Canva, Photoshop o Shapr3D, responde exactament
         model: "gpt-4o-mini-search-preview-2025-03-11",
         messages,
         max_tokens: 1024,
-        temperature: 0.3,
       }),
     });
 
