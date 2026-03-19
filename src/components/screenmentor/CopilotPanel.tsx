@@ -70,38 +70,52 @@ export function CopilotPanel({ isOpen, onClose, onMinimize }: CopilotPanelProps)
     setIsSpeaking(false);
 
     const image_base64 = captureSnapshot();
+    const maxRetries = 3;
 
-    try {
-      const { data, error } = await supabase.functions.invoke("screen-mentor", {
-        body: {
-          image_base64,
-          texto_transcrito: text,
-          nivel_usuario: level,
-          software_seleccionado: software,
-        },
-      });
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      try {
+        const { data, error } = await supabase.functions.invoke("screen-mentor", {
+          body: {
+            image_base64,
+            texto_transcrito: text,
+            nivel_usuario: level,
+            software_seleccionado: software,
+          },
+        });
 
-      if (error) throw error;
+        if (error) {
+          // Check if it's a 429 rate limit error
+          if (error.message?.includes("non-2xx") && attempt < maxRetries - 1) {
+            const wait = (attempt + 1) * 3000;
+            console.log(`Rate limited, retrying in ${wait}ms (attempt ${attempt + 1}/${maxRetries})`);
+            await new Promise(r => setTimeout(r, wait));
+            continue;
+          }
+          throw error;
+        }
 
-      const rawSteps = data?.steps || "No se pudo generar una respuesta.";
-      const parsed: string[] = typeof rawSteps === "string"
-        ? rawSteps.split("\n").filter((l: string) => l.trim())
-        : Array.isArray(rawSteps) ? rawSteps : [String(rawSteps)];
+        const rawSteps = data?.steps || "No se pudo generar una respuesta.";
+        const parsed: string[] = typeof rawSteps === "string"
+          ? rawSteps.split("\n").filter((l: string) => l.trim())
+          : Array.isArray(rawSteps) ? rawSteps : [String(rawSteps)];
 
-      setSteps(parsed);
-      setCurrentStep(0);
-      clearTranscript();
+        setSteps(parsed);
+        setCurrentStep(0);
+        clearTranscript();
 
-      if (parsed.length > 0) {
-        speakStep(parsed[0]);
+        if (parsed.length > 0) {
+          speakStep(parsed[0]);
+        }
+        break;
+      } catch (err: any) {
+        if (attempt === maxRetries - 1) {
+          console.error("Query error:", err);
+          setSteps(["Error: No se pudo procesar tu solicitud. Intenta de nuevo en unos segundos."]);
+          setCurrentStep(0);
+        }
       }
-    } catch (err: any) {
-      console.error("Query error:", err);
-      setSteps(["Error: No se pudo procesar tu solicitud. Intenta de nuevo."]);
-      setCurrentStep(0);
-    } finally {
-      setIsLoading(false);
     }
+    setIsLoading(false);
   };
 
   const handleNextStep = () => {
