@@ -1,25 +1,25 @@
 
 
-# Cambiar modelo a gpt-4o-mini-search-preview-2025-03-11
-
-## Contexto
-
-La función `screen-mentor` actualmente usa el modelo `gpt-4o` de OpenAI. El usuario quiere cambiarlo a `gpt-4o-mini-search-preview-2025-03-11`.
-
-**Nota importante:** El modelo anterior `gpt-4o-search-preview` falló porque el proyecto de OpenAI no tenía acceso. Este nuevo modelo podría tener la misma restricción. Si falla, habrá que revertir a `gpt-4o`.
+# Eliminar `temperature` del Edge Function screen-mentor
 
 ## Cambio
 
-**Archivo:** `supabase/functions/screen-mentor/index.ts` (línea 137)
+**Archivo:** `supabase/functions/screen-mentor/index.ts`
 
-Cambiar:
+Eliminar la línea `temperature: 0.3` del body enviado a OpenAI, ya que el modelo `gpt-4o-mini-search-preview-2025-03-11` no soporta este parámetro y causa error 400.
+
 ```
-model: "gpt-4o"
-```
-Por:
-```
-model: "gpt-4o-mini-search-preview-2025-03-11"
+// Antes:
+model: "gpt-4o-mini-search-preview-2025-03-11",
+messages,
+max_tokens: 1024,
+temperature: 0.3,
+
+// Después:
+model: "gpt-4o-mini-search-preview-2025-03-11",
+messages,
+max_tokens: 1024,
 ```
 
-Un solo cambio de una línea. No se modifica nada más.
+Un solo cambio de una línea.
 
