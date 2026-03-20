@@ -93,11 +93,13 @@ export function SoftwareSelector({ selected, onSelect }: SoftwareSelectorProps) 
                       : "border-border bg-accent/30 hover:border-primary/40 hover:bg-accent/60"
                   )}
                 >
-                  <img
-                    src={sw.logo}
-                    alt={sw.label}
-                    className="h-32 w-32 rounded-lg object-contain"
-                  />
+                  <div className="flex h-32 w-32 items-center justify-center">
+                    <img
+                      src={sw.logo}
+                      alt={sw.label}
+                      className="max-h-20 max-w-20 rounded-lg object-contain"
+                    />
+                  </div>
                   <span
                     className={cn(
                       "text-xs font-medium",
