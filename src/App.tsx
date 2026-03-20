@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
@@ -19,15 +19,36 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
 function PublicRoute({ children }: { children: React.ReactNode }) {
   const { session, loading, isRecovery } = useAuth();
+  const location = useLocation();
+  const hasRecoveryParams =
+    location.pathname === "/auth" &&
+    (location.search.includes("recovery=1") ||
+      location.hash.includes("type=recovery") ||
+      location.hash.includes("access_token"));
+
   if (loading) return null;
-  if (session && !isRecovery) return <Navigate to="/" replace />;
+  if (session && !isRecovery && !hasRecoveryParams) return <Navigate to="/" replace />;
   return <>{children}</>;
 }
 
 const AppRoutes = () => (
   <Routes>
-    <Route path="/auth" element={<PublicRoute><Auth /></PublicRoute>} />
-    <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+    <Route
+      path="/auth"
+      element={
+        <PublicRoute>
+          <Auth />
+        </PublicRoute>
+      }
+    />
+    <Route
+      path="/"
+      element={
+        <ProtectedRoute>
+          <Index />
+        </ProtectedRoute>
+      }
+    />
     <Route path="*" element={<NotFound />} />
   </Routes>
 );
