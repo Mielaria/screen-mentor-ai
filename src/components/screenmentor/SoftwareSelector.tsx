@@ -19,7 +19,7 @@ export interface SoftwareOption {
 const SOFTWARE_OPTIONS: SoftwareOption[] = [
   { id: "photoshop", label: "Photoshop", logo: photoshopLogo },
   { id: "canva", label: "Canva", logo: canvaLogo },
-  { id: "shapr3d", label: "Shapr3D", logo: shapr3dLogo },
+  { id: "shapr3d", label: "Shapr3D", logo: shapr3dLogo, logoClassName: "max-h-12 max-w-12" },
   { id: "blender", label: "Blender 3D", logo: blenderLogo },
   { id: "illustrator", label: "Illustrator", logo: illustratorLogo, logoClassName: "max-h-[65px] max-w-[65px]" },
   {
