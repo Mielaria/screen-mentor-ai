@@ -26,7 +26,7 @@ const SOFTWARE_OPTIONS: SoftwareOption[] = [
     id: "capcut",
     label: "CapCut",
     logo: capcutLogo,
-    logoClassName: "max-h-16 max-w-16",
+    logoClassName: "max-h-10 max-w-10",
   },
 ];
 
