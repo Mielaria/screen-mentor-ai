@@ -21,7 +21,7 @@ const SOFTWARE_OPTIONS: SoftwareOption[] = [
   { id: "canva", label: "Canva", logo: canvaLogo },
   { id: "shapr3d", label: "Shapr3D", logo: shapr3dLogo },
   { id: "blender", label: "Blender 3D", logo: blenderLogo },
-  { id: "illustrator", label: "Illustrator", logo: illustratorLogo },
+  { id: "illustrator", label: "Illustrator", logo: illustratorLogo, logoClassName: "max-h-10 max-w-10" },
   {
     id: "capcut",
     label: "CapCut",
