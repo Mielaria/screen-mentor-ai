@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Bot, Mail, Lock, User, ArrowLeft, Loader2, CheckCircle, KeyRound } from "lucide-react";
+import { Bot, Mail, Lock, User, ArrowLeft, Loader2, CheckCircle } from "lucide-react";
 
-type View = "landing" | "login" | "register" | "forgot";
-type ForgotStep = "email" | "code" | "newpass";
+type View = "landing" | "login" | "register" | "forgot" | "newpass";
+type ForgotStep = "email" | "sent";
 
 export default function Auth() {
   const [view, setView] = useState<View>("landing");
