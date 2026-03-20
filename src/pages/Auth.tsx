@@ -3,12 +3,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Bot, Mail, Lock, User, ArrowLeft, Loader2, CheckCircle } from "lucide-react";
 
-type View = "landing" | "login" | "register" | "forgot" | "newpass";
-
-const RECOVERY_REDIRECT_URL = "https://screen-mentor-ai.lovable.app/auth?recovery=1";
+type View = "landing" | "login" | "register" | "forgot";
 
 export default function Auth() {
-  const { isRecovery } = useAuth();
   const [view, setView] = useState<View>("landing");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -16,22 +13,7 @@ export default function Auth() {
   const [error, setError] = useState("");
   const [info, setInfo] = useState("");
   const [loading, setLoading] = useState(false);
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [forgotSent, setForgotSent] = useState(false);
-
-  useEffect(() => {
-    const hasRecoveryParams =
-      window.location.search.includes("recovery=1") ||
-      window.location.hash.includes("type=recovery") ||
-      window.location.hash.includes("access_token");
-
-    if (isRecovery || hasRecoveryParams) {
-      setView("newpass");
-      setError("");
-      setInfo("");
-    }
-  }, [isRecovery]);
 
   const resetForm = () => {
     setEmail("");
@@ -39,8 +21,6 @@ export default function Auth() {
     setFullName("");
     setError("");
     setInfo("");
-    setNewPassword("");
-    setConfirmPassword("");
     setForgotSent(false);
   };
 
@@ -64,7 +44,6 @@ export default function Auth() {
       await supabase.auth.signOut();
       setError("Debes verificar tu correo electrónico antes de iniciar sesión.");
     }
-
     setLoading(false);
   };
 
@@ -98,7 +77,6 @@ export default function Auth() {
         setView("login");
       }, 3000);
     }
-
     setLoading(false);
   };
 
@@ -109,50 +87,15 @@ export default function Auth() {
     setLoading(true);
 
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: RECOVERY_REDIRECT_URL,
+      redirectTo: `${window.location.origin}/reset-password`,
     });
 
     if (error) {
       setError(error.message);
     } else {
       setForgotSent(true);
-      setInfo("Te enviamos un enlace a tu correo. Ábrelo y volverás directamente aquí para cambiar tu contraseña.");
+      setInfo("Te enviamos un enlace a tu correo. Ábrelo para cambiar tu contraseña.");
     }
-
-    setLoading(false);
-  };
-
-  const handleSetNewPassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-    setInfo("");
-
-    if (newPassword !== confirmPassword) {
-      setError("Las contraseñas no coinciden.");
-      return;
-    }
-
-    if (newPassword.length < 6) {
-      setError("La contraseña debe tener al menos 6 caracteres.");
-      return;
-    }
-
-    setLoading(true);
-
-    const { error } = await supabase.auth.updateUser({ password: newPassword });
-
-    if (error) {
-      setError(error.message);
-    } else {
-      window.history.replaceState({}, "", "/auth");
-      await supabase.auth.signOut();
-      setInfo("Contraseña actualizada correctamente. Ahora puedes iniciar sesión.");
-      setTimeout(() => {
-        resetForm();
-        setView("login");
-      }, 2000);
-    }
-
     setLoading(false);
   };
 
@@ -165,7 +108,6 @@ export default function Auth() {
               <Bot className="h-10 w-10 text-primary" />
             </div>
           </div>
-
           <div>
             <h1 className="text-4xl font-extrabold tracking-tight">
               <span className="text-foreground">Screen</span>
@@ -174,22 +116,15 @@ export default function Auth() {
             </h1>
             <p className="mt-3 text-muted-foreground">Tu mentor digital en tiempo real</p>
           </div>
-
           <div className="space-y-3">
             <button
-              onClick={() => {
-                resetForm();
-                setView("login");
-              }}
+              onClick={() => { resetForm(); setView("login"); }}
               className="w-full rounded-xl bg-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground transition-all hover:scale-[1.02] hover:bg-primary/90"
             >
               Iniciar sesión
             </button>
             <button
-              onClick={() => {
-                resetForm();
-                setView("register");
-              }}
+              onClick={() => { resetForm(); setView("register"); }}
               className="w-full rounded-xl border border-border bg-card px-6 py-3.5 text-sm font-semibold text-foreground transition-all hover:scale-[1.02] hover:bg-accent"
             >
               Registrarse
@@ -200,74 +135,12 @@ export default function Auth() {
     );
   }
 
-  if (view === "newpass") {
-    return (
-      <div className="dark flex min-h-screen flex-col items-center justify-center bg-background px-4">
-        <div className="w-full max-w-sm space-y-6">
-          <div className="text-center space-y-2">
-            <h2 className="text-2xl font-bold text-foreground">Nueva contraseña</h2>
-            <p className="text-sm text-muted-foreground">Establece tu nueva contraseña para volver a entrar al asistente.</p>
-          </div>
-
-          <form onSubmit={handleSetNewPassword} className="space-y-4">
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium text-muted-foreground">Nueva contraseña</label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <input
-                  type="password"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="w-full rounded-xl border border-border bg-card py-3 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
-                  required
-                  minLength={6}
-                />
-              </div>
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium text-muted-foreground">Confirmar contraseña</label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <input
-                  type="password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="w-full rounded-xl border border-border bg-card py-3 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
-                  required
-                  minLength={6}
-                />
-              </div>
-            </div>
-
-            {error && <div className="rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">{error}</div>}
-            {info && <div className="rounded-xl border border-primary/30 bg-primary/10 px-4 py-3 text-sm text-primary">{info}</div>}
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground transition-all hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-              Cambiar contraseña
-            </button>
-          </form>
-        </div>
-      </div>
-    );
-  }
-
   if (view === "forgot") {
     return (
       <div className="dark flex min-h-screen flex-col items-center justify-center bg-background px-4">
         <div className="w-full max-w-sm space-y-6">
           <button
-            onClick={() => {
-              resetForm();
-              setView("login");
-            }}
+            onClick={() => { resetForm(); setView("login"); }}
             className="flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
           >
             <ArrowLeft className="h-4 w-4" />
@@ -278,7 +151,7 @@ export default function Auth() {
             <h2 className="text-2xl font-bold text-foreground">Recuperar contraseña</h2>
             <p className="text-sm text-muted-foreground">
               {forgotSent
-                ? "Revisa tu correo y toca el enlace para volver aquí y crear tu nueva contraseña."
+                ? "Revisa tu correo y toca el enlace para cambiar tu contraseña."
                 : "Ingresa tu correo y te enviaremos un enlace para restablecer tu contraseña."}
             </p>
           </div>
@@ -299,9 +172,7 @@ export default function Auth() {
                   />
                 </div>
               </div>
-
               {error && <div className="rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">{error}</div>}
-
               <button
                 type="submit"
                 disabled={loading}
@@ -318,7 +189,7 @@ export default function Auth() {
               </div>
               {info && <div className="rounded-xl border border-primary/30 bg-primary/10 px-4 py-3 text-center text-sm text-primary">{info}</div>}
               <p className="text-center text-xs text-muted-foreground">
-                Si lo abres desde tu teléfono, te llevará directamente a esta pantalla para cambiar la contraseña.
+                Al abrir el enlace llegarás a una página para escribir tu nueva contraseña.
               </p>
             </div>
           )}
@@ -333,10 +204,7 @@ export default function Auth() {
     <div className="dark flex min-h-screen flex-col items-center justify-center bg-background px-4">
       <div className="w-full max-w-sm space-y-6">
         <button
-          onClick={() => {
-            resetForm();
-            setView("landing");
-          }}
+          onClick={() => { resetForm(); setView("landing"); }}
           className="flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
         >
           <ArrowLeft className="h-4 w-4" />
@@ -354,14 +222,8 @@ export default function Auth() {
               <label className="text-xs font-medium text-muted-foreground">Nombre completo</label>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <input
-                  type="text"
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  placeholder="Tu nombre"
-                  className="w-full rounded-xl border border-border bg-card py-3 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
-                  required
-                />
+                <input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Tu nombre"
+                  className="w-full rounded-xl border border-border bg-card py-3 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50" required />
               </div>
             </div>
           )}
@@ -370,14 +232,8 @@ export default function Auth() {
             <label className="text-xs font-medium text-muted-foreground">Correo electrónico</label>
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="correo@ejemplo.com"
-                className="w-full rounded-xl border border-border bg-card py-3 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
-                required
-              />
+              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="correo@ejemplo.com"
+                className="w-full rounded-xl border border-border bg-card py-3 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50" required />
             </div>
           </div>
 
@@ -385,28 +241,15 @@ export default function Auth() {
             <label className="text-xs font-medium text-muted-foreground">Contraseña</label>
             <div className="relative">
               <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className="w-full rounded-xl border border-border bg-card py-3 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
-                required
-                minLength={6}
-              />
+              <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••"
+                className="w-full rounded-xl border border-border bg-card py-3 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50" required minLength={6} />
             </div>
           </div>
 
           {isLogin && (
             <div className="text-right">
-              <button
-                type="button"
-                onClick={() => {
-                  resetForm();
-                  setView("forgot");
-                }}
-                className="text-xs font-medium text-primary hover:underline"
-              >
+              <button type="button" onClick={() => { resetForm(); setView("forgot"); }}
+                className="text-xs font-medium text-primary hover:underline">
                 Se me olvidó la contraseña
               </button>
             </div>
@@ -415,11 +258,8 @@ export default function Auth() {
           {error && <div className="rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">{error}</div>}
           {info && <div className="rounded-xl border border-primary/30 bg-primary/10 px-4 py-3 text-sm text-primary">{info}</div>}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground transition-all hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
-          >
+          <button type="submit" disabled={loading}
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground transition-all hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50">
             {loading && <Loader2 className="h-4 w-4 animate-spin" />}
             {isLogin ? "Ingresar" : "Crear cuenta"}
           </button>
@@ -427,13 +267,8 @@ export default function Auth() {
 
         <p className="text-center text-xs text-muted-foreground">
           {isLogin ? "¿No tienes cuenta?" : "¿Ya tienes cuenta?"}{" "}
-          <button
-            onClick={() => {
-              resetForm();
-              setView(isLogin ? "register" : "login");
-            }}
-            className="font-medium text-primary hover:underline"
-          >
+          <button onClick={() => { resetForm(); setView(isLogin ? "register" : "login"); }}
+            className="font-medium text-primary hover:underline">
             {isLogin ? "Regístrate" : "Inicia sesión"}
           </button>
         </p>
