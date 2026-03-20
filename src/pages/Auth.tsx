@@ -117,6 +117,83 @@ export default function Auth() {
     );
   }
 
+  if (view === "forgot") {
+    const handleForgot = async (e: React.FormEvent) => {
+      e.preventDefault();
+      setError("");
+      setInfo("");
+      setLoading(true);
+
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+
+      if (error) {
+        setError(error.message);
+      } else {
+        setInfo("Si el correo existe, recibirás un enlace para restablecer tu contraseña.");
+      }
+      setLoading(false);
+    };
+
+    return (
+      <div className="dark flex min-h-screen flex-col items-center justify-center bg-background px-4">
+        <div className="w-full max-w-sm space-y-6">
+          <button
+            onClick={() => { resetForm(); setView("login"); }}
+            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Volver al inicio de sesión
+          </button>
+
+          <div className="text-center space-y-2">
+            <h2 className="text-2xl font-bold text-foreground">Recuperar contraseña</h2>
+            <p className="text-sm text-muted-foreground">Ingresa tu correo y te enviaremos un enlace para restablecerla.</p>
+          </div>
+
+          <form onSubmit={handleForgot} className="space-y-4">
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-muted-foreground">Correo electrónico</label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="correo@ejemplo.com"
+                  className="w-full rounded-xl border border-border bg-card pl-10 pr-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  required
+                />
+              </div>
+            </div>
+
+            {error && (
+              <div className="rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
+                {error}
+              </div>
+            )}
+
+            {info && (
+              <div className="rounded-xl border border-primary/30 bg-primary/10 px-4 py-3 text-sm text-primary">
+                {info}
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full rounded-xl bg-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground transition-all hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            >
+              {loading && <Loader2 className="h-4 w-4 animate-spin" />}
+              Enviar enlace
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
+
   const isLogin = view === "login";
 
   return (
@@ -187,6 +264,18 @@ export default function Auth() {
               />
             </div>
           </div>
+
+          {isLogin && (
+            <div className="text-right">
+              <button
+                type="button"
+                onClick={() => { resetForm(); setView("forgot"); }}
+                className="text-xs text-green-500 hover:underline"
+              >
+                Se me olvidó la contraseña
+              </button>
+            </div>
+          )}
 
           {error && (
             <div className="rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
