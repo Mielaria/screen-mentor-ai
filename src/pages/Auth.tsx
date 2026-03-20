@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 import { Bot, Mail, Lock, User, ArrowLeft, Loader2, CheckCircle } from "lucide-react";
 
 type View = "landing" | "login" | "register" | "forgot" | "newpass";
 
 export default function Auth() {
+  const { isRecovery } = useAuth();
   const [view, setView] = useState<View>("landing");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -18,17 +20,14 @@ export default function Auth() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [forgotSent, setForgotSent] = useState(false);
 
-  // Listen for PASSWORD_RECOVERY event (when user clicks link in email)
+  // Auto-switch to newpass view when recovery is detected
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === "PASSWORD_RECOVERY") {
-        setView("newpass");
-        setError("");
-        setInfo("");
-      }
-    });
-    return () => subscription.unsubscribe();
-  }, []);
+    if (isRecovery) {
+      setView("newpass");
+      setError("");
+      setInfo("");
+    }
+  }, [isRecovery]);
 
   const resetForm = () => {
     setEmail("");
