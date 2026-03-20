@@ -28,7 +28,6 @@ const AppRoutes = () => (
   <Routes>
     <Route path="/auth" element={<PublicRoute><Auth /></PublicRoute>} />
     <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
-    <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
     <Route path="*" element={<NotFound />} />
   </Routes>
 );
