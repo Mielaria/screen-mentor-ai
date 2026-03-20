@@ -2,7 +2,7 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Bot, Mail, Lock, User, ArrowLeft, Loader2 } from "lucide-react";
 
-type View = "landing" | "login" | "register";
+type View = "landing" | "login" | "register" | "forgot";
 
 export default function Auth() {
   const [view, setView] = useState<View>("landing");
