@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Bot, Mail, Lock, User, ArrowLeft, Loader2 } from "lucide-react";
+import { Bot, Mail, Lock, User, ArrowLeft, Loader2, CheckCircle, KeyRound } from "lucide-react";
 
 type View = "landing" | "login" | "register" | "forgot";
+type ForgotStep = "email" | "code" | "newpass";
 
 export default function Auth() {
   const [view, setView] = useState<View>("landing");
@@ -13,12 +14,22 @@ export default function Auth() {
   const [info, setInfo] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // Forgot password state
+  const [forgotStep, setForgotStep] = useState<ForgotStep>("email");
+  const [otpCode, setOtpCode] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
   const resetForm = () => {
     setEmail("");
     setPassword("");
     setFullName("");
     setError("");
     setInfo("");
+    setOtpCode("");
+    setNewPassword("");
+    setConfirmPassword("");
+    setForgotStep("email");
   };
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -77,6 +88,76 @@ export default function Auth() {
     setLoading(false);
   };
 
+  // Forgot password handlers
+  const handleSendCode = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setInfo("");
+    setLoading(true);
+
+    const { error } = await supabase.auth.resetPasswordForEmail(email);
+
+    if (error) {
+      setError(error.message);
+    } else {
+      setInfo("Se envió un código de verificación a tu correo electrónico.");
+      setForgotStep("code");
+    }
+    setLoading(false);
+  };
+
+  const handleVerifyCode = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setInfo("");
+    setLoading(true);
+
+    const { error } = await supabase.auth.verifyOtp({
+      email,
+      token: otpCode,
+      type: "recovery",
+    });
+
+    if (error) {
+      setError("Código inválido o expirado. Intenta de nuevo.");
+    } else {
+      setInfo("Código verificado. Ingresa tu nueva contraseña.");
+      setForgotStep("newpass");
+    }
+    setLoading(false);
+  };
+
+  const handleSetNewPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setInfo("");
+
+    if (newPassword !== confirmPassword) {
+      setError("Las contraseñas no coinciden.");
+      return;
+    }
+    if (newPassword.length < 6) {
+      setError("La contraseña debe tener al menos 6 caracteres.");
+      return;
+    }
+
+    setLoading(true);
+
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+
+    if (error) {
+      setError(error.message);
+    } else {
+      await supabase.auth.signOut();
+      setInfo("Contraseña actualizada correctamente. Ahora puedes iniciar sesión.");
+      setTimeout(() => {
+        resetForm();
+        setView("login");
+      }, 3000);
+    }
+    setLoading(false);
+  };
+
   if (view === "landing") {
     return (
       <div className="dark flex min-h-screen flex-col items-center justify-center bg-background px-4">
@@ -118,24 +199,6 @@ export default function Auth() {
   }
 
   if (view === "forgot") {
-    const handleForgot = async (e: React.FormEvent) => {
-      e.preventDefault();
-      setError("");
-      setInfo("");
-      setLoading(true);
-
-      const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`,
-      });
-
-      if (error) {
-        setError(error.message);
-      } else {
-        setInfo("Si el correo existe, recibirás un enlace para restablecer tu contraseña.");
-      }
-      setLoading(false);
-    };
-
     return (
       <div className="dark flex min-h-screen flex-col items-center justify-center bg-background px-4">
         <div className="w-full max-w-sm space-y-6">
@@ -149,46 +212,144 @@ export default function Auth() {
 
           <div className="text-center space-y-2">
             <h2 className="text-2xl font-bold text-foreground">Recuperar contraseña</h2>
-            <p className="text-sm text-muted-foreground">Ingresa tu correo y te enviaremos un enlace para restablecerla.</p>
+            <p className="text-sm text-muted-foreground">
+              {forgotStep === "email" && "Ingresa tu correo para recibir un código de verificación."}
+              {forgotStep === "code" && "Ingresa el código que recibiste en tu correo."}
+              {forgotStep === "newpass" && "Establece tu nueva contraseña."}
+            </p>
           </div>
 
-          <form onSubmit={handleForgot} className="space-y-4">
-            <div className="space-y-1.5">
-              <label className="text-xs font-medium text-muted-foreground">Correo electrónico</label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="correo@ejemplo.com"
-                  className="w-full rounded-xl border border-border bg-card pl-10 pr-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
-                  required
-                />
+          {/* Step indicators */}
+          <div className="flex items-center justify-center gap-2">
+            {(["email", "code", "newpass"] as ForgotStep[]).map((step, i) => (
+              <div key={step} className="flex items-center gap-2">
+                <div className={`h-2 w-2 rounded-full transition-colors ${
+                  forgotStep === step ? "bg-primary" :
+                  (["email", "code", "newpass"].indexOf(forgotStep) > i ? "bg-primary/50" : "bg-muted")
+                }`} />
+                {i < 2 && <div className="w-8 h-px bg-border" />}
               </div>
-            </div>
+            ))}
+          </div>
 
-            {error && (
-              <div className="rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
-                {error}
+          {forgotStep === "email" && (
+            <form onSubmit={handleSendCode} className="space-y-4">
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-muted-foreground">Correo electrónico</label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="correo@ejemplo.com"
+                    className="w-full rounded-xl border border-border bg-card pl-10 pr-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                    required
+                  />
+                </div>
               </div>
-            )}
 
-            {info && (
-              <div className="rounded-xl border border-primary/30 bg-primary/10 px-4 py-3 text-sm text-primary">
-                {info}
+              {error && (
+                <div className="rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">{error}</div>
+              )}
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full rounded-xl bg-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground transition-all hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {loading && <Loader2 className="h-4 w-4 animate-spin" />}
+                Enviar código
+              </button>
+            </form>
+          )}
+
+          {forgotStep === "code" && (
+            <form onSubmit={handleVerifyCode} className="space-y-4">
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-muted-foreground">Código de verificación</label>
+                <div className="relative">
+                  <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <input
+                    type="text"
+                    value={otpCode}
+                    onChange={(e) => setOtpCode(e.target.value)}
+                    placeholder="Ingresa el código"
+                    className="w-full rounded-xl border border-border bg-card pl-10 pr-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 tracking-widest"
+                    required
+                  />
+                </div>
               </div>
-            )}
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full rounded-xl bg-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground transition-all hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-            >
-              {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-              Enviar enlace
-            </button>
-          </form>
+              {error && (
+                <div className="rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">{error}</div>
+              )}
+              {info && (
+                <div className="rounded-xl border border-primary/30 bg-primary/10 px-4 py-3 text-sm text-primary">{info}</div>
+              )}
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full rounded-xl bg-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground transition-all hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {loading && <Loader2 className="h-4 w-4 animate-spin" />}
+                Verificar código
+              </button>
+            </form>
+          )}
+
+          {forgotStep === "newpass" && (
+            <form onSubmit={handleSetNewPassword} className="space-y-4">
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-muted-foreground">Nueva contraseña</label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <input
+                    type="password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full rounded-xl border border-border bg-card pl-10 pr-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                    required
+                    minLength={6}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="text-xs font-medium text-muted-foreground">Confirmar contraseña</label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <input
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="••••••••"
+                    className="w-full rounded-xl border border-border bg-card pl-10 pr-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                    required
+                    minLength={6}
+                  />
+                </div>
+              </div>
+
+              {error && (
+                <div className="rounded-xl border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">{error}</div>
+              )}
+              {info && (
+                <div className="rounded-xl border border-primary/30 bg-primary/10 px-4 py-3 text-sm text-primary">{info}</div>
+              )}
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full rounded-xl bg-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground transition-all hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              >
+                {loading && <Loader2 className="h-4 w-4 animate-spin" />}
+                Cambiar contraseña
+              </button>
+            </form>
+          )}
         </div>
       </div>
     );
