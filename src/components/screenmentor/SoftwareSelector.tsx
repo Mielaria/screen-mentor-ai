@@ -13,6 +13,7 @@ export interface SoftwareOption {
   id: string;
   label: string;
   logo: string;
+  logoClassName?: string;
 }
 
 const SOFTWARE_OPTIONS: SoftwareOption[] = [
@@ -21,7 +22,12 @@ const SOFTWARE_OPTIONS: SoftwareOption[] = [
   { id: "shapr3d", label: "Shapr3D", logo: shapr3dLogo },
   { id: "blender", label: "Blender 3D", logo: blenderLogo },
   { id: "illustrator", label: "Illustrator", logo: illustratorLogo },
-  { id: "capcut", label: "CapCut", logo: capcutLogo },
+  {
+    id: "capcut",
+    label: "CapCut",
+    logo: capcutLogo,
+    logoClassName: "max-h-16 max-w-16",
+  },
 ];
 
 interface SoftwareSelectorProps {
@@ -45,7 +51,6 @@ export function SoftwareSelector({ selected, onSelect }: SoftwareSelectorProps) 
         Software
       </span>
 
-      {/* Trigger button */}
       <button
         onClick={() => setIsOpen(true)}
         className="flex w-full items-center gap-2.5 rounded-xl border border-border bg-accent/50 px-3 py-2.5 text-xs font-medium text-foreground transition-all hover:border-primary/40"
@@ -65,11 +70,9 @@ export function SoftwareSelector({ selected, onSelect }: SoftwareSelectorProps) 
         <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
       </button>
 
-      {/* Overlay panel */}
       {isOpen && (
-        <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
-          <div className="relative w-full max-w-xs rounded-2xl border border-border bg-card shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-            {/* Header */}
+        <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+          <div className="relative w-full max-w-xs overflow-hidden rounded-2xl border border-border bg-card shadow-2xl animate-in fade-in zoom-in-95 duration-200">
             <div className="flex items-center justify-between border-b border-border px-4 py-3">
               <span className="text-sm font-semibold text-foreground">Seleccionar software</span>
               <button
@@ -80,8 +83,7 @@ export function SoftwareSelector({ selected, onSelect }: SoftwareSelectorProps) 
               </button>
             </div>
 
-            {/* Grid */}
-            <div className="grid grid-cols-2 gap-3 p-4 max-h-[60vh] overflow-y-auto">
+            <div className="grid max-h-[60vh] grid-cols-2 gap-3 overflow-y-auto p-4">
               {SOFTWARE_OPTIONS.map((sw) => (
                 <button
                   key={sw.id}
@@ -97,7 +99,10 @@ export function SoftwareSelector({ selected, onSelect }: SoftwareSelectorProps) 
                     <img
                       src={sw.logo}
                       alt={sw.label}
-                      className="max-h-20 max-w-20 rounded-lg object-contain"
+                      className={cn(
+                        "rounded-lg object-contain max-h-20 max-w-20",
+                        sw.logoClassName
+                      )}
                     />
                   </div>
                   <span
