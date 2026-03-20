@@ -16,9 +16,20 @@ export default function Auth() {
 
   // Forgot password state
   const [forgotStep, setForgotStep] = useState<ForgotStep>("email");
-  const [otpCode, setOtpCode] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+
+  // Listen for PASSWORD_RECOVERY event (when user clicks link in email)
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === "PASSWORD_RECOVERY") {
+        setView("newpass");
+        setError("");
+        setInfo("");
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, []);
 
   const resetForm = () => {
     setEmail("");
