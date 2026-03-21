@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { Bot, Mail, Lock, User, ArrowLeft, Loader2, CheckCircle } from "lucide-react";
+import { Bot, Mail, Lock, User, ArrowLeft, Loader2, CheckCircle, Eye, EyeOff } from "lucide-react";
 
 type View = "landing" | "login" | "register" | "forgot";
 
