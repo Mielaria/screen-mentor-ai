@@ -14,6 +14,7 @@ export default function Auth() {
   const [info, setInfo] = useState("");
   const [loading, setLoading] = useState(false);
   const [forgotSent, setForgotSent] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const resetForm = () => {
     setEmail("");
