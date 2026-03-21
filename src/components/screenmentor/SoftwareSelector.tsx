@@ -83,24 +83,24 @@ export function SoftwareSelector({ selected, onSelect }: SoftwareSelectorProps) 
               </button>
             </div>
 
-            <div className="grid max-h-[60vh] grid-cols-2 gap-3 overflow-y-auto p-4">
+            <div className="grid max-h-[50vh] grid-cols-2 gap-3 overflow-y-auto overscroll-contain p-4 touch-pan-y [-webkit-overflow-scrolling:touch]">
               {SOFTWARE_OPTIONS.map((sw) => (
                 <button
                   key={sw.id}
                   onClick={() => handleSelect(sw.id)}
                   className={cn(
-                    "flex flex-col items-center gap-2 rounded-xl border p-4 transition-all duration-200",
+                    "flex flex-col items-center gap-2 rounded-xl border p-3 transition-all duration-200",
                     selected === sw.id
                       ? "border-primary bg-primary/10 ring-1 ring-primary/30"
                       : "border-border bg-accent/30 hover:border-primary/40 hover:bg-accent/60"
                   )}
                 >
-                  <div className="flex h-32 w-32 items-center justify-center">
+                  <div className="flex h-16 w-16 items-center justify-center shrink-0">
                     <img
                       src={sw.logo}
                       alt={sw.label}
                       className={cn(
-                        "rounded-lg object-contain max-h-20 max-w-20",
+                        "rounded-lg object-contain max-h-14 max-w-14",
                         sw.logoClassName
                       )}
                     />
