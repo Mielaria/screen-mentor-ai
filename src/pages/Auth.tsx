@@ -87,7 +87,7 @@ export default function Auth() {
     setLoading(true);
 
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/reset-password`,
+      redirectTo: "https://screen-mentor-ai.lovable.app/reset-password",
     });
 
     if (error) {
