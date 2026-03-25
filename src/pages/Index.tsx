@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { ScreenMentor } from "@/components/screenmentor/ScreenMentor";
 import { Monitor, Mic, Bot, LogOut } from "lucide-react";
 import { FeedbackSection } from "@/components/FeedbackSection";
+import { UserProfileMenu } from "@/components/screenmentor/UserProfileMenu";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -34,15 +35,9 @@ const Index = () => {
 
   return (
     <div className="dark min-h-screen bg-background">
-      {/* Top bar with logout */}
+      {/* Top bar with profile */}
       <div className="fixed top-4 right-4 z-50">
-        <button
-          onClick={signOut}
-          className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-destructive/20 hover:text-destructive"
-        >
-          <LogOut className="h-4 w-4" />
-          Cerrar sesión
-        </button>
+        <UserProfileMenu />
       </div>
 
       {/* Hero */}

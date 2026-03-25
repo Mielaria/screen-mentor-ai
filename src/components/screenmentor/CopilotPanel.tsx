@@ -12,7 +12,6 @@ import { SoftwareSelector } from "./SoftwareSelector";
 import { LevelSelector } from "./LevelSelector";
 import { ResponseArea } from "./ResponseArea";
 import { ChatInput } from "./ChatInput";
-import { UserProfileMenu } from "./UserProfileMenu";
 import { cn } from "@/lib/utils";
 
 interface CopilotPanelProps {
@@ -295,17 +294,14 @@ export function CopilotPanel({ isOpen, onClose, onMinimize }: CopilotPanelProps)
         </div>
       )}
 
-      {/* Footer — Chat input + Profile */}
-      <div className="flex items-end gap-2 border-t border-border px-3 py-2.5 shrink-0">
-        <UserProfileMenu />
-        <div className="flex-1 min-w-0">
-          <ChatInput
-            onSendText={handleQuery}
-            onMicClick={handleMic}
-            isListening={isListening}
-            isLoading={isLoading}
-          />
-        </div>
+      {/* Footer — Chat input */}
+      <div className="border-t border-border px-3 py-2.5 shrink-0">
+        <ChatInput
+          onSendText={handleQuery}
+          onMicClick={handleMic}
+          isListening={isListening}
+          isLoading={isLoading}
+        />
       </div>
 
       {/* Resize handle */}
