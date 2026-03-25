@@ -6,6 +6,12 @@ export function useVoiceInput() {
   const recognitionRef = useRef<any>(null);
 
   const startListening = useCallback(() => {
+    // Stop any previous instance
+    if (recognitionRef.current) {
+      try { recognitionRef.current.abort(); } catch {}
+      recognitionRef.current = null;
+    }
+
     const SpeechRecognition =
       (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
 
@@ -16,28 +22,55 @@ export function useVoiceInput() {
 
     const recognition = new SpeechRecognition();
     recognition.lang = "es-ES";
-    recognition.continuous = false;
-    recognition.interimResults = false;
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.maxAlternatives = 1;
+
+    let finalText = "";
 
     recognition.onresult = (event: any) => {
-      const text = event.results[0][0].transcript;
-      setTranscript(text);
-      setIsListening(false);
+      let interim = "";
+      for (let i = 0; i < event.results.length; i++) {
+        const result = event.results[i];
+        if (result.isFinal) {
+          finalText += result[0].transcript;
+        } else {
+          interim += result[0].transcript;
+        }
+      }
+      setTranscript(finalText || interim);
     };
 
     recognition.onerror = (event: any) => {
+      // "no-speech" and "aborted" are non-critical, don't stop
+      if (event.error === "no-speech" || event.error === "aborted") {
+        return;
+      }
       console.error("Speech recognition error:", event.error);
       setIsListening(false);
     };
 
     recognition.onend = () => {
+      // If still listening and we got final text, keep it
+      if (finalText) {
+        setTranscript(finalText);
+      }
       setIsListening(false);
     };
 
     recognitionRef.current = recognition;
-    recognition.start();
-    setIsListening(true);
     setTranscript("");
+    setIsListening(true);
+
+    // Small delay to ensure mic permissions are ready
+    setTimeout(() => {
+      try {
+        recognition.start();
+      } catch (err) {
+        console.error("Failed to start recognition:", err);
+        setIsListening(false);
+      }
+    }, 100);
   }, []);
 
   const stopListening = useCallback(() => {
