@@ -36,7 +36,7 @@ const Index = () => {
   return (
     <div className="dark min-h-screen bg-background">
       {/* Top bar with profile */}
-      <div className="fixed top-4 right-4 z-50">
+      <div className="fixed top-4 left-4 z-50">
         <UserProfileMenu />
       </div>
 
