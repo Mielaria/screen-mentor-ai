@@ -295,22 +295,17 @@ export function CopilotPanel({ isOpen, onClose, onMinimize }: CopilotPanelProps)
         </div>
       )}
 
-      {/* Footer — Mic button */}
-      <div className="flex items-center gap-2 border-t border-border px-3 py-2.5 shrink-0">
-        <button
-          onClick={handleMic}
-          disabled={isLoading}
-          className={cn(
-            "flex flex-1 items-center justify-center gap-2 rounded-xl py-2.5 text-xs font-semibold transition-all",
-            isListening
-              ? "animate-pulse bg-destructive text-destructive-foreground"
-              : "bg-primary text-primary-foreground hover:bg-primary/90",
-            isLoading && "opacity-50 cursor-not-allowed"
-          )}
-        >
-          <Mic className="h-3.5 w-3.5" />
-          Consultar
-        </button>
+      {/* Footer — Chat input + Profile */}
+      <div className="flex items-end gap-2 border-t border-border px-3 py-2.5 shrink-0">
+        <UserProfileMenu />
+        <div className="flex-1 min-w-0">
+          <ChatInput
+            onSendText={handleQuery}
+            onMicClick={handleMic}
+            isListening={isListening}
+            isLoading={isLoading}
+          />
+        </div>
       </div>
 
       {/* Resize handle */}
