@@ -29,6 +29,17 @@ export function useVoiceInput() {
 
     let finalText = "";
 
+    const resetSilenceTimer = () => {
+      if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
+      silenceTimerRef.current = setTimeout(() => {
+        // 2 seconds of silence — stop and send what we have
+        try { recognition.stop(); } catch {}
+      }, 2000);
+    };
+
+    // Start the initial silence timer
+    resetSilenceTimer();
+
     recognition.onresult = (event: any) => {
       let interim = "";
       for (let i = 0; i < event.results.length; i++) {
@@ -40,19 +51,21 @@ export function useVoiceInput() {
         }
       }
       setTranscript(finalText || interim);
+      // Reset timer on each new result
+      resetSilenceTimer();
     };
 
     recognition.onerror = (event: any) => {
-      // "no-speech" and "aborted" are non-critical, don't stop
       if (event.error === "no-speech" || event.error === "aborted") {
         return;
       }
       console.error("Speech recognition error:", event.error);
+      if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
       setIsListening(false);
     };
 
     recognition.onend = () => {
-      // If still listening and we got final text, keep it
+      if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
       if (finalText) {
         setTranscript(finalText);
       }
