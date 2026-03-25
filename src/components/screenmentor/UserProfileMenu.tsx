@@ -69,7 +69,7 @@ export function UserProfileMenu() {
       </button>
 
       {isOpen && (
-        <div className="absolute bottom-10 left-0 z-50 w-52 rounded-xl border border-border bg-card/95 backdrop-blur-md shadow-xl shadow-black/30 overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-200">
+        <div className="absolute top-10 right-0 z-50 w-52 rounded-xl border border-border bg-card/95 backdrop-blur-md shadow-xl shadow-black/30 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
           {/* User info */}
           <div className="border-b border-border px-4 py-3">
             <div className="flex items-center gap-3">

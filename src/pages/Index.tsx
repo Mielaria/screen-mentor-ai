@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { ScreenMentor } from "@/components/screenmentor/ScreenMentor";
-import { Monitor, Mic, Bot, LogOut } from "lucide-react";
+import { Monitor, Mic, Bot } from "lucide-react";
 import { FeedbackSection } from "@/components/FeedbackSection";
 import { UserProfileMenu } from "@/components/screenmentor/UserProfileMenu";
 import { useAuth } from "@/contexts/AuthContext";
