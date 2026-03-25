@@ -11,6 +11,8 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { SoftwareSelector } from "./SoftwareSelector";
 import { LevelSelector } from "./LevelSelector";
 import { ResponseArea } from "./ResponseArea";
+import { ChatInput } from "./ChatInput";
+import { UserProfileMenu } from "./UserProfileMenu";
 import { cn } from "@/lib/utils";
 
 interface CopilotPanelProps {
