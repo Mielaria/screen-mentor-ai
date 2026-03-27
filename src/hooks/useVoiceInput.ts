@@ -33,7 +33,7 @@ export function useVoiceInput() {
       if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
       silenceTimerRef.current = setTimeout(() => {
         try { recognition.stop(); } catch {}
-      }, 1000);
+      }, 1500);
     };
 
     // Start the initial silence timer
