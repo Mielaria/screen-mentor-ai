@@ -21,19 +21,6 @@ interface CopilotPanelProps {
 }
 
 export function CopilotPanel({ isOpen, onClose, onMinimize }: CopilotPanelProps) {
-  const handleClose = useCallback(() => {
-    setSteps([]);
-    setCurrentStep(0);
-    stopTTS();
-    setIsSpeaking(false);
-    clearTranscript();
-    resetPosition();
-    resetSize();
-    if (isSharing) stopCapture();
-    if (hasManualCapture) clearManualCapture();
-    onClose();
-  }, [stopTTS, clearTranscript, resetPosition, resetSize, isSharing, stopCapture, hasManualCapture, clearManualCapture, onClose]);
-  
   const [software, setSoftware] = useState("photoshop");
   const [level, setLevel] = useState("basico");
   const [steps, setSteps] = useState<string[]>([]);
@@ -56,6 +43,19 @@ export function CopilotPanel({ isOpen, onClose, onMinimize }: CopilotPanelProps)
     { width: 280, height: 360 },
     { width: 800, height: 1000 }
   );
+
+  const handleClose = useCallback(() => {
+    setSteps([]);
+    setCurrentStep(0);
+    stopTTS();
+    setIsSpeaking(false);
+    clearTranscript();
+    resetPosition();
+    resetSize();
+    if (isSharing) stopCapture();
+    if (hasManualCapture) clearManualCapture();
+    onClose();
+  }, [stopTTS, clearTranscript, resetPosition, resetSize, isSharing, stopCapture, hasManualCapture, clearManualCapture, onClose]);
 
   const speakStep = useCallback((text: string) => {
     stopTTS();
