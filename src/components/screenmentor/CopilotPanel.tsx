@@ -35,13 +35,13 @@ export function CopilotPanel({ isOpen, onClose, onMinimize }: CopilotPanelProps)
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { position, onMouseDown, onTouchStart, resetPosition } = useDraggable({
-    x: isMobile ? 10 : Math.max(40, window.innerWidth - 520),
-    y: isMobile ? 10 : 40,
+    x: isMobile ? 0 : Math.max(0, window.innerWidth - 520),
+    y: 0,
   });
   const { size, onResizeStart, onResizeTouchStart, resetSize } = useResizable(
-    isMobile ? { width: Math.min(420, window.innerWidth - 20), height: 670 } : { width: 476, height: 728 },
+    isMobile ? { width: window.innerWidth, height: window.innerHeight } : { width: 476, height: window.innerHeight },
     { width: 280, height: 360 },
-    { width: 800, height: 1000 }
+    { width: 800, height: window.innerHeight }
   );
 
   const handleClose = useCallback(() => {
