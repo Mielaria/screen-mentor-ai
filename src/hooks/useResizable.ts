@@ -70,5 +70,7 @@ export function useResizable(
     };
   }, [minSize, maxSize]);
 
-  return { size, onResizeStart, onResizeTouchStart };
+  const resetSize = useCallback(() => setSize(initialSize), [initialSize]);
+
+  return { size, onResizeStart, onResizeTouchStart, resetSize };
 }

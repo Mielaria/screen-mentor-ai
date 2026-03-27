@@ -32,9 +32,8 @@ export function useVoiceInput() {
     const resetSilenceTimer = () => {
       if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
       silenceTimerRef.current = setTimeout(() => {
-        // 2 seconds of silence — stop and send what we have
         try { recognition.stop(); } catch {}
-      }, 2000);
+      }, 500);
     };
 
     // Start the initial silence timer

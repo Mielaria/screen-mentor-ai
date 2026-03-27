@@ -76,5 +76,7 @@ export function useDraggable(initialPosition: Position = { x: 100, y: 100 }) {
     };
   }, [clampPosition]);
 
-  return { position, onMouseDown, onTouchStart, isDragging: isDragging.current };
+  const resetPosition = useCallback(() => setPosition(initialPosition), [initialPosition]);
+
+  return { position, onMouseDown, onTouchStart, isDragging: isDragging.current, resetPosition };
 }

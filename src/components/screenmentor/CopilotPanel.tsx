@@ -21,7 +21,6 @@ interface CopilotPanelProps {
 }
 
 export function CopilotPanel({ isOpen, onClose, onMinimize }: CopilotPanelProps) {
-  
   const [software, setSoftware] = useState("photoshop");
   const [level, setLevel] = useState("basico");
   const [steps, setSteps] = useState<string[]>([]);
@@ -35,15 +34,28 @@ export function CopilotPanel({ isOpen, onClose, onMinimize }: CopilotPanelProps)
   const isMobile = useIsMobile();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const { position, onMouseDown, onTouchStart } = useDraggable({
-    x: isMobile ? 10 : Math.max(40, window.innerWidth - 400),
+  const { position, onMouseDown, onTouchStart, resetPosition } = useDraggable({
+    x: isMobile ? 10 : Math.max(40, window.innerWidth - 520),
     y: isMobile ? 10 : 40,
   });
-  const { size, onResizeStart, onResizeTouchStart } = useResizable(
-    isMobile ? { width: Math.min(320, window.innerWidth - 20), height: 480 } : { width: 340, height: 520 },
+  const { size, onResizeStart, onResizeTouchStart, resetSize } = useResizable(
+    isMobile ? { width: Math.min(420, window.innerWidth - 20), height: 670 } : { width: 476, height: 728 },
     { width: 280, height: 360 },
-    { width: 600, height: 800 }
+    { width: 800, height: 1000 }
   );
+
+  const handleClose = useCallback(() => {
+    setSteps([]);
+    setCurrentStep(0);
+    stopTTS();
+    setIsSpeaking(false);
+    clearTranscript();
+    resetPosition();
+    resetSize();
+    if (isSharing) stopCapture();
+    if (hasManualCapture) clearManualCapture();
+    onClose();
+  }, [stopTTS, clearTranscript, resetPosition, resetSize, isSharing, stopCapture, hasManualCapture, clearManualCapture, onClose]);
 
   const speakStep = useCallback((text: string) => {
     stopTTS();
@@ -184,7 +196,7 @@ export function CopilotPanel({ isOpen, onClose, onMinimize }: CopilotPanelProps)
             <Minus className="h-3.5 w-3.5" />
           </button>
           <button
-            onClick={onClose}
+            onClick={handleClose}
             className="flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-destructive/20 hover:text-destructive"
             title="Cerrar"
           >
