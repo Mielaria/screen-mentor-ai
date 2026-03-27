@@ -35,14 +35,14 @@ export function CopilotPanel({ isOpen, onClose, onMinimize }: CopilotPanelProps)
   const isMobile = useIsMobile();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const { position, onMouseDown, onTouchStart } = useDraggable({
-    x: isMobile ? 10 : Math.max(40, window.innerWidth - 400),
+  const { position, onMouseDown, onTouchStart, resetPosition } = useDraggable({
+    x: isMobile ? 10 : Math.max(40, window.innerWidth - 520),
     y: isMobile ? 10 : 40,
   });
-  const { size, onResizeStart, onResizeTouchStart } = useResizable(
-    isMobile ? { width: Math.min(320, window.innerWidth - 20), height: 480 } : { width: 340, height: 520 },
+  const { size, onResizeStart, onResizeTouchStart, resetSize } = useResizable(
+    isMobile ? { width: Math.min(420, window.innerWidth - 20), height: 670 } : { width: 476, height: 728 },
     { width: 280, height: 360 },
-    { width: 600, height: 800 }
+    { width: 800, height: 1000 }
   );
 
   const speakStep = useCallback((text: string) => {
