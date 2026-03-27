@@ -196,7 +196,7 @@ export function CopilotPanel({ isOpen, onClose, onMinimize }: CopilotPanelProps)
             <Minus className="h-3.5 w-3.5" />
           </button>
           <button
-            onClick={onClose}
+            onClick={handleClose}
             className="flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-destructive/20 hover:text-destructive"
             title="Cerrar"
           >
